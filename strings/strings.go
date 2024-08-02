@@ -1,5 +1,10 @@
 package strings
 
+import (
+	"strings"
+	"unicode"
+)
+
 type String string
 
 /*
@@ -103,33 +108,236 @@ Same as:
 
 	strs1 + strs2 + ... + strsN
 */
-func (str String) Concatenate(strs ...String) String {
+func (str String) Concatenate(strs ...string) String {
 	for _, value := range strs {
-		str += value
+		str += String(value)
 	}
 	return str
 }
 
-/*
-Decatenates str2 from str1 together without modifying the base String.
+// /*
+// Decatenates str2 from str1 together without modifying the base String.
 
-Exact same as:
+// Exact same as:
 
-	strings.TrimSuffix
-*/
-func (str1 String) Decatenate(str2 String) String {
-	if len(str1) >= len(str2) && str1[len(str1)-len(str2):] == str2 {
-		return str1[:len(str1)-len(str2)]
-	}
-	return str1
+// 	strings.TrimSuffix
+// */
+// func (str1 String) Decatenate(str2 string) String {
+// 	return String(strings.TrimSuffix(string(str1), str2))
+// }
+
+func (str String) Clone() String {
+	return String(strings.Clone(string(str)))
 }
 
-func (str String) Repeat(n int) (repeated String) {
-	if n < 0 {
-		panic("Invalid count value")
+func (str1 String) Compare(str2 String) int {
+	return strings.Compare(string(str1), string(str2))
+}
+
+func (str String) Contains(substr String) bool {
+	return str.Contains(substr)
+}
+
+func (str String) ContainsAny(substr String) bool {
+	return str.ContainsAny(substr)
+}
+
+func (str String) ContainsRune(substr rune) bool {
+	return str.ContainsRune(substr)
+}
+
+func (str String) Count(substr String) int {
+	return strings.Count(string(str), string(substr))
+}
+
+func (str String) Cut(sep String) (before string, after string, found bool) {
+	return strings.Cut(string(str), string(sep))
+}
+
+func (str String) EqualFold(t String) bool {
+	return strings.EqualFold(string(str), string(t))
+}
+
+func (str String) Fields() (fields []String) {
+	native := strings.Fields(string(str))
+	for _, value := range native {
+		fields = append(fields, String(value))
 	}
-	for i := 0; i < n; i++ {
-		repeated += str
+	return fields
+}
+
+func (str String) FieldsFunc(f func(rune) bool) (fields []String) {
+	native := strings.FieldsFunc(string(str), f)
+	fields = make([]String, len(native))
+	for i, value := range native {
+		fields[i] = String(value)
 	}
-	return repeated
+	return fields
+}
+
+func (str String) HasPrefix(prefix String) bool {
+	return strings.HasPrefix(string(str), string(prefix))
+}
+
+func (str String) HasSuffix(prefix String) bool {
+	return strings.HasSuffix(string(str), string(prefix))
+}
+
+func (str String) Index(substr String) int {
+	return strings.Index(string(str), string(substr))
+}
+
+func (str String) IndexAny(substr String) int {
+	return strings.IndexAny(string(str), string(substr))
+}
+
+func (str String) IndexByte(c byte) int {
+	return strings.IndexByte(string(str), c)
+}
+func (str String) IndexFunc(f func(rune) bool) int {
+	return strings.IndexFunc(string(str), f)
+}
+
+func (str String) IndexRune(substr rune) int {
+	return strings.IndexRune(string(str), substr)
+}
+
+func Join(elems []String, sep String) String {
+	strElems := make([]string, len(elems))
+	for i, elem := range elems {
+		strElems[i] = string(elem)
+	}
+	return String(strings.Join(strElems, string(sep)))
+}
+
+func (str String) LastIndex(substr String) int {
+	return strings.LastIndex(string(str), string(substr))
+}
+
+func (str String) LastIndexAny(chars String) int {
+	return strings.LastIndexAny(string(str), string(chars))
+}
+
+func (str String) LastIndexByte(c byte) int {
+	return strings.LastIndexByte(string(str), c)
+}
+
+func (str String) LastIndexFunc(f func(rune) bool) int {
+	return strings.LastIndexFunc(string(str), f)
+}
+
+func (str String) Map(mapping func(rune) rune) String {
+	return String(strings.Map(mapping, string(str)))
+}
+
+func (str String) Repeat(count int) String {
+	return String(strings.Repeat(string(str), count))
+}
+
+func (str String) Replace(old String, new String, n int) String {
+	return String(strings.Replace(string(str), string(old), string(new), n))
+}
+
+func (str String) ReplaceAll(s, old, new String) String {
+	return str.Replace(old, new, -1)
+}
+
+func (str String) Split(sep String) []String {
+	native := strings.Split(string(str), string(sep))
+	strs := make([]String, len(native))
+	for i, value := range native {
+		strs[i] = String(value)
+	}
+	return strs
+}
+
+func (str String) SplitAfter(sep String) []String {
+	native := strings.SplitAfter(string(str), string(sep))
+	strs := make([]String, len(native))
+	for i, value := range native {
+		strs[i] = String(value)
+	}
+	return strs
+}
+
+func (str String) SplitAfterN(sep String, n int) []String {
+	native := strings.SplitAfterN(string(str), string(sep), n)
+	strs := make([]String, len(native))
+	for i, value := range native {
+		strs[i] = String(value)
+	}
+	return strs
+}
+
+func (str String) SplitN(sep String, n int) []String {
+	native := strings.SplitN(string(str), string(sep), n)
+	strs := make([]String, len(native))
+	for i, value := range native {
+		strs[i] = String(value)
+	}
+	return strs
+}
+
+func (str String) ToLower() String {
+	return String(strings.ToLower(string(str)))
+}
+
+func (str String) ToLowerSpecial(c unicode.SpecialCase) String {
+	return String(strings.ToLowerSpecial(c, string(str)))
+}
+
+func (str String) ToTitle() String {
+	return String(strings.ToTitle(string(str)))
+}
+
+func (str String) ToTitleSpecial(c unicode.SpecialCase) String {
+	return String(strings.ToTitleSpecial(c, string(str)))
+}
+
+func (str String) ToUpper() String {
+	return String(strings.ToUpper(string(str)))
+}
+
+func (str String) ToUpperSpecial(c unicode.SpecialCase) String {
+	return String(strings.ToUpperSpecial(c, string(str)))
+}
+
+func (str String) ToValidUTF8(replacement String) String {
+	return String(strings.ToValidUTF8(string(str), string(replacement)))
+}
+
+func (str String) Trim(cutset String) String {
+	return String(strings.Trim(string(str), string(cutset)))
+}
+
+func (str String) TrimFunc(s String, f func(rune) bool) String {
+	return String(strings.TrimFunc(string(str), f))
+}
+
+func (str String) TrimLeft(cutset String) String {
+	return String(strings.TrimLeft(string(str), string(cutset)))
+}
+
+func (str String) TrimLeftFunc(s String, f func(rune) bool) String {
+	return String(strings.TrimLeftFunc(string(str), f))
+}
+
+func (str String) TrimPrefix(prefix String) String {
+	return String(strings.TrimPrefix(string(str), string(prefix)))
+}
+
+func (str String) TrimRight(cutset String) String {
+	return String(strings.TrimRight(string(str), string(cutset)))
+}
+
+func (str String) TrimRightFunc(s String, f func(rune) bool) String {
+	return String(strings.TrimRightFunc(string(str), f))
+}
+
+func (str String) TrimSpace() String {
+	return String(strings.TrimSpace(string(str)))
+}
+
+func (str String) TrimSuffix(suffix String) String {
+	return String(strings.TrimSuffix(string(str), string(suffix)))
 }
