@@ -26,7 +26,7 @@ Same as:
 
 	str := strings.String("Hello World")
 */
-func From[S ~string](value S) String {
+func From[S ~string | []byte | []rune](value S) String {
 	return String(value)
 }
 
@@ -150,8 +150,19 @@ func (str String) Count(substr String) int {
 	return strings.Count(string(str), string(substr))
 }
 
-func (str String) Cut(sep String) (before string, after string, found bool) {
-	return strings.Cut(string(str), string(sep))
+func (str String) Cut(sep String) (before String, after String, found bool) {
+	bf, af, found := strings.Cut(string(str), string(sep))
+	return String(bf), String(af), found
+}
+
+func (str String) CutPrefix(prefix String) (after String, found bool) {
+	af, found := strings.CutPrefix(string(str), string(prefix))
+	return String(af), found
+}
+
+func (str String) CutSuffix(prefix String) (after String, found bool) {
+	af, found := strings.CutSuffix(string(str), string(prefix))
+	return String(af), found
 }
 
 func (str String) EqualFold(t String) bool {
@@ -238,7 +249,7 @@ func (str String) Replace(old String, new String, n int) String {
 	return String(strings.Replace(string(str), string(old), string(new), n))
 }
 
-func (str String) ReplaceAll(s, old, new String) String {
+func (str String) ReplaceAll(old, new String) String {
 	return str.Replace(old, new, -1)
 }
 
