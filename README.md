@@ -12,6 +12,9 @@ A collection of "upgraded" Golang types.
 ## Description
 
 The Go-Types package contains Object-Oriented types of [Golang types](https://go.dev/ref/spec#Types) with built-in methods that native types doesn't implement.
+They also convert standard library functions into methods.
+
+<!-- The package usage of interfaces and generics allows Golang's type inference -->
 
 <!-- Such as: Negative indexing for Strings -->
 
