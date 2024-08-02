@@ -84,3 +84,42 @@ func (str String) At(n int) byte {
 	}
 	return str[n]
 }
+
+/*
+Returns strings.String as a slice of bytes
+
+Same as:
+
+	[]byte(str)
+*/
+func (str String) Bytes() []byte {
+	return []byte(str)
+}
+
+/*
+Concatenates multiple strings.String together without modifying the base String.
+
+Same as:
+
+	strs1 + strs2 + ... + strsN
+*/
+func (str String) Concatenate(strs ...String) String {
+	for _, value := range strs {
+		str += value
+	}
+	return str
+}
+
+/*
+Decatenates str2 from str1 together without modifying the base String.
+
+Exact same as:
+
+	strings.TrimSuffix
+*/
+func (str1 String) Decatenate(str2 String) String {
+	if len(str1) >= len(str2) && str1[len(str1)-len(str2):] == str2 {
+		return str1[:len(str1)-len(str2)]
+	}
+	return str1
+}
