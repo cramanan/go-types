@@ -135,15 +135,15 @@ func (str1 String) Compare(str2 String) int {
 }
 
 func (str String) Contains(substr String) bool {
-	return str.Contains(substr)
+	return strings.Contains(string(str), string(substr))
 }
 
 func (str String) ContainsAny(substr String) bool {
-	return str.ContainsAny(substr)
+	return strings.ContainsAny(string(str), string(substr))
 }
 
 func (str String) ContainsRune(substr rune) bool {
-	return str.ContainsRune(substr)
+	return strings.ContainsRune(string(str), substr)
 }
 
 func (str String) Count(substr String) int {
