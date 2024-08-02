@@ -123,3 +123,13 @@ func (str1 String) Decatenate(str2 String) String {
 	}
 	return str1
 }
+
+func (str String) Repeat(n int) (repeated String) {
+	if n < 0 {
+		panic("Invalid count value")
+	}
+	for i := 0; i < n; i++ {
+		repeated += str
+	}
+	return repeated
+}
