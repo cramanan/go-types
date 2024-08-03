@@ -77,6 +77,22 @@ func (str String) Last() byte {
 }
 
 /*
+Returns the nth String of String.
+
+Negative indexing is supported (experimental)
+
+Same as:
+
+	str[n]
+*/
+func (str String) At(n int) String {
+	if n < 0 {
+		n = len(str) + n
+	}
+	return String(str[n])
+}
+
+/*
 Returns the nth byte of strings.String.
 
 Negative indexing is supported (experimental)
@@ -85,11 +101,27 @@ Same as:
 
 	str[n]
 */
-func (str String) At(n int) byte {
+func (str String) ByteAt(n int) byte {
 	if n < 0 {
 		n = len(str) + n
 	}
 	return str[n]
+}
+
+/*
+Returns the nth byte of strings.String.
+
+Negative indexing is supported (experimental)
+
+Same as:
+
+	str[n]
+*/
+func (str String) RuneAt(n int) rune {
+	if n < 0 {
+		n = len(str) + n
+	}
+	return rune(str[n])
 }
 
 /*
