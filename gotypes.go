@@ -1,7 +1,13 @@
 /*
+A collection of Object-Oriented Golang types.
+
 # Types
 
 ## String
+
+Documentation:
+
+https://pkg.go.dev/github.com/cramanan/go-types/strings
 
 	package main
 
