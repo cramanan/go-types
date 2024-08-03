@@ -6,8 +6,11 @@ A collection of "upgraded" Golang types.
 
 -   [Go-Types](#go-types)
 -   [Overview](#overview)
+-   [Description](#description)
 -   [Import](#import)
 -   [Types](#types)
+    -   [String](#string)
+    -   [Slice](#slice)
 
 ## Description
 
@@ -27,3 +30,7 @@ go get github.com/cramanan/go-types
 ```
 
 ## Types
+
+### String
+
+### Slice
