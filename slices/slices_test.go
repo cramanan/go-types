@@ -181,3 +181,32 @@ func TestSlice_ForEach(t *testing.T) {
 		t.Errorf("recipient = %v, want %s", recipient, want)
 	}
 }
+
+func TestSlice_Filter(t *testing.T) {
+	slice := New(10, 0, 0, 20, 0, 30, 0, 40)
+	removeZeros := func(element int, _ int) bool { return element != 0 }
+	got := slice.Filter(removeZeros)
+	want := New(10, 20, 30, 40)
+	if !eq(got, want) {
+		t.Errorf("slice.Filter(removeZeros) = %v, want %v", got, want)
+	}
+}
+
+func TestSlice_Some(t *testing.T) {
+	slice := New(false, false, true, false, false)
+	some := func(element bool, _ int) bool { return element }
+	got := slice.Some(some)
+	if !got {
+		t.Errorf("slice.Some(some) = %t, want %t", got, true)
+	}
+
+}
+
+func TestSlice_Every(t *testing.T) {
+	slice := New(0, 1, 2, 3, 4, 5, 6)
+	under10 := func(element int, _ int) bool { return element < 10 }
+	got := slice.Every(under10)
+	if !got {
+		t.Errorf("slice.Every(under10) = %t, want %t", got, true)
+	}
+}
