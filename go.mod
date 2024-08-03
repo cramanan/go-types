@@ -1,3 +1,3 @@
-module github.com/cramanan/types
+module github.com/cramanan/go-types
 
 go 1.20
