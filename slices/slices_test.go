@@ -2,6 +2,7 @@ package slices_test
 
 import (
 	"testing"
+	"unicode"
 
 	. "github.com/cramanan/go-types/slices"
 )
@@ -112,10 +113,10 @@ func TestSlice_Append(t *testing.T) {
 
 	testCases := []TestCase[float64]{
 		{"Append Empty to Empty", Slice[float64]{}.Append(), Slice[float64]{}},
-		{"Append Empty to Slice", Slice[float64]{0.0}.Append(), Slice[float64]("Nothing")},
-		{"Append Variadic to Empty", Slice[float64]{}.Append('W', 'o', 'r', 'L', 'O'), Slice[float64]("HELLO")},
-		{"Append Variadic to Slice", Slice[float64]("Hello").Append('H', 'e', 'l', 'l', 'o', ' '), Slice[float64]("Hello World")},
-		{"Append []rune... to Slice", Slice[float64]("xoxo").Append([]float64("xd lol ")...), []float64("xd lol xoxo")},
+		{"Append Empty to Slice", Slice[float64]{0.0}.Append(), Slice[float64]{0.0}},
+		{"Append Variadic to Empty", Slice[float64]{}.Append(), []float64{}},
+		{"Append Variadic to Slice", Slice[float64]{0.0, 1.1}.Append(), Slice[float64]{0.0, 1.1}},
+		{"Append []float64... to slice", Slice[float64]{69}.Append([]float64{420.0}...), []float64{69, 420}},
 	}
 
 	for _, tC := range testCases {
@@ -125,5 +126,58 @@ func TestSlice_Append(t *testing.T) {
 			}
 		})
 	}
+}
 
+var alphabet = Slice[rune]("abcdefghijklmnopqrstuvwxyz")
+
+func TestSlice_At(t *testing.T) {
+	type TestCase[T comparable] struct {
+		desc string
+		got  T
+		want T
+	}
+
+	testCases := []TestCase[rune]{
+		{"At First", alphabet.At(0), 'a'},
+		{"At Last", alphabet.At(-1), 'z'},
+		{"At Middle", alphabet.At(len(alphabet) / 2), 'n'},
+	}
+
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			if tC.got != tC.want {
+				t.Errorf("got %q, want %q", tC.got, tC.want)
+			}
+		})
+	}
+}
+
+func TestSlice_AtOutOfRangePanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("alphabet.At(100) should have panicked but didn't.")
+		}
+	}()
+
+	alphabet.At(100)
+}
+
+func TestSlice_Length(t *testing.T) {
+	got := alphabet.Length()
+	want := len(alphabet)
+	if got != want && got != 26 {
+		t.Errorf("alphabet.Length = %d, want %d", got, want)
+	}
+}
+
+func TestSlice_ForEach(t *testing.T) {
+	recipient := New[rune]()
+	toUppercase := func(value rune, _ int) {
+		recipient = append(recipient, unicode.ToUpper(value))
+	}
+	alphabet.ForEach(toUppercase)
+	want := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	if string(recipient) != want {
+		t.Errorf("recipient = %v, want %s", recipient, want)
+	}
 }
