@@ -26,7 +26,7 @@ Same as:
 
 	str := strings.String("Hello World")
 */
-func From[S ~string | []byte | []rune](value S) String {
+func From[S ~string | ~[]byte | ~[]rune](value S) String {
 	return String(value)
 }
 
@@ -53,7 +53,8 @@ func (str String) Length() int {
 }
 
 /*
-Returns the first byte of strings.String
+Returns the first byte of strings.String.
+Will panic if String is empty.
 
 Same as:
 
@@ -65,6 +66,7 @@ func (str String) First() byte {
 
 /*
 Returns the last byte of strings.String
+Will panic if String is empty.
 
 Same as:
 
