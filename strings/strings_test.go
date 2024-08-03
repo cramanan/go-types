@@ -15,7 +15,7 @@ import (
 	"unicode/utf8"
 	"unsafe"
 
-	. "github.com/cramanan/types/strings"
+	. "github.com/cramanan/go-types/strings"
 )
 
 func eq(a, b []String) bool {
