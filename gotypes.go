@@ -3,9 +3,7 @@
 
 # String
 
-Documentation:
-
-https://pkg.go.dev/github.com/cramanan/go-types/strings
+Documentation: https://pkg.go.dev/github.com/cramanan/go-types/strings
 
 	package main
 
@@ -20,6 +18,17 @@ https://pkg.go.dev/github.com/cramanan/go-types/strings
 
 		// From can also convert any string aliases, []rune and []byte
 		fromString = strings.From([]byte{'F','o','o'})
+
+		// Every standard strings functions are available as methods
+		upper := fromString.ToUpper()
+		lower := fromString.ToLower()
+
+		// And even more
+		last := fromString.At(-1) // "o"
 	}
+
+# Slice
+
+Documentation : https://pkg.go.dev/github.com/cramanan/go-types/slices
 */
 package gotypes
