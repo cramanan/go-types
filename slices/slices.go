@@ -18,21 +18,11 @@ func (slice Slice[T]) Append(values ...T) Slice[T] {
 	return append(slice, values...)
 }
 
-func (slice1 Slice[T]) Merge(slice2 Slice[T]) Slice[T] {
-	return append(slice1, slice2...)
-}
-
 func (slice Slice[T]) At(n int) T {
 	if n < 0 {
 		n = len(slice) + n
 	}
 	return slice[n]
-}
-
-func (slice *Slice[T]) Pop() (last T) {
-	last = (*slice)[len(*slice)-1]
-	*slice = (*slice)[:len(*slice)-1]
-	return last
 }
 
 func (slice Slice[T]) Length() int {
