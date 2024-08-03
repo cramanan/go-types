@@ -1,9 +1,7 @@
 /*
-A collection of Object-Oriented Golang types.
-
 # Types
 
-## String
+# String
 
 Documentation:
 
