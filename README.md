@@ -1,5 +1,7 @@
 # Go-Types
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/cramanan/go-types.svg)](https://pkg.go.dev/github.com/cramanan/go-types)
+
 A collection of "upgraded" Golang types.
 
 ## Overview
@@ -51,6 +53,6 @@ func main() {
 
 The String type comes bundled with every functions from the standard strings library as methods. e.g: `fromString.ToUpper() => "FOO"`
 
-Note that these methods returns shallow copies and do not modify the string in any way. `fromString == "Foo" // true`
+Note that these methods returns shallow copies and do not modify the string in any way.
 
 ### Slice
