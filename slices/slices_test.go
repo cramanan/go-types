@@ -4,7 +4,7 @@ import (
 	"testing"
 	"unicode"
 
-	. "github.com/cramanan/go-types/slices"
+	. "github.com/cramanan/types/slices"
 )
 
 func eq[T comparable](a, b Slice[T]) bool {

@@ -15,7 +15,7 @@ import (
 	"unicode/utf8"
 	"unsafe"
 
-	. "github.com/cramanan/go-types/strings"
+	. "github.com/cramanan/types/strings"
 )
 
 func eq(a, b []String) bool {
@@ -1185,7 +1185,7 @@ func repeat(s String, count int) (err error) {
 			}
 		}
 	}()
-	s.Repeat(count)
+	_ = s.Repeat(count)
 	return
 }
 
