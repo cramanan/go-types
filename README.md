@@ -26,13 +26,13 @@ They also convert standard library functions into methods.
 
 This package only provides wrappers and do not handle any of these recurring problems:
 
--   panics : panic situations are always propagated when they occurs.
+-   panics : triggered panic are still propagated when they occurs.
 -   concurrency : if you use these types for concurrent jobs you will have to add your own handlers.
 -   nil pointer dereferences : the provided functions & methods does not protect from nil pointer dereferences.
 
 #### Your code, your rules
 
-The Go-Types project was designed for any type of project. The use of generics and interfaces completly overthrow the [comparable](https://go.dev/blog/comparable) and Ordered interfaces.
+The Go-Types project was designed for any type of project. The use of generics and interfaces completly overthrow the [comparable](https://go.dev/blog/comparable) and [Ordered](https://pkg.go.dev/constraints#Ordered) interfaces.
 
 If you wish to use this package for structs, native slices or maps that cannot be compared with [comparison operators](https://go.dev/ref/spec#Comparison_operators), you will have to use functions that use your own comparison rules:
 
