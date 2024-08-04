@@ -21,7 +21,7 @@ func Greater[T ordered](e1 T, e2 T) bool { return e1 > e2 }
 func GreaterOrEqual[T ordered](e1 T, e2 T) bool { return e1 >= e2 }
 
 // CompFunc is the Ordered function for operators
-func CompFunc[T ordered](f func(T, T) bool, value T) func(T) bool {
+func UseOrdered[T ordered](f func(T, T) bool, value T) func(T) bool {
 	return func(comp T) bool {
 		return f(comp, value)
 	}
