@@ -2,7 +2,6 @@ package slices_test
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 	"unicode"
 
@@ -10,7 +9,15 @@ import (
 )
 
 func eq[T comparable](a, b Slice[T]) bool {
-	return reflect.DeepEqual(a, b)
+	if len(a) != len(b) {
+		return false
+	}
+	for i := 0; i < len(a); i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
 
 func TestNew(t *testing.T) {
@@ -156,8 +163,8 @@ func TestSlice_AtOutOfRangePanic(t *testing.T) {
 	alphabet.At(100)
 }
 
-func TestSlice_Length(t *testing.T) {
-	got := alphabet.Length()
+func TestSlice_Len(t *testing.T) {
+	got := alphabet.Len()
 	want := len(alphabet)
 	if got != want && got != 26 {
 		t.Errorf("alphabet.Length = %d, want %d", got, want)
@@ -242,6 +249,19 @@ func TestSlice_ContainsFunc(t *testing.T) {
 	if got != want {
 		t.Errorf("slice.IndexFunc(hasJohn) = %t, want %t", got, want)
 	}
+}
+
+func TestSlice_EqualFunc(t *testing.T) {
+	s1 := Slice[int]{1, 2, 3, 4, 5}
+	s2 := Slice[int]{1, 2, 3, 4, 5}
+
+	eq := func(e1, e2 int) bool { return e1 == e2 }
+	got := s1.EqualFunc(s2, eq)
+	want := true
+	if got != want {
+		t.Errorf("s1.EqualFunc(s2, eq) = %t, want %t", got, want)
+	}
+
 }
 
 func TestMap(t *testing.T) {

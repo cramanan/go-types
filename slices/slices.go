@@ -292,6 +292,30 @@ func (slice Slice[T]) ContainsFunc(f func(T) bool) bool {
 }
 
 /*
+EqualFunc compares two slices for equality using a custom comparison function.
+
+Example:
+
+	s1 := Slice[int]{1,2,3,4,5}
+	s2 := Slice[int]{1,2,3,4,5}
+
+	eq := func(e1, e2 int) bool{ return e1 == e2 }
+	equals := s1.EqualFunc(s2, eq)
+	//equals is now true
+*/
+func (s1 Slice[T]) EqualFunc(s2 Slice[T], eq func(T, T) bool) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+	for i, v1 := range s1 {
+		if !eq(v1, s2[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+/*
 Map applies a transformation function to each element of the input Slice[From] and returns a new Slice[To] with the results.
 
 The transformation function is called with one argument: the current element's value.
