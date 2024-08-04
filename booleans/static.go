@@ -1,5 +1,28 @@
 package booleans
 
+// New returns False as a Boolean.
+func New() Boolean {
+	return False
+}
+
+// From converts b into a Boolean.
+func From[B ~bool](b B) Boolean {
+	return Boolean(b)
+}
+
+// From converts int into to Boolean.
+func FromInt(i int) Boolean {
+	return i != 0
+}
+
+// ToInt convert b into an integer.
+func ToInt(b Boolean) int {
+	if b {
+		return 1
+	}
+	return 0
+}
+
 // NOT returns the logical negation of b.
 func NOT(b Boolean) Boolean { return !b }
 

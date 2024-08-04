@@ -29,28 +29,9 @@
 //	}
 package booleans
 
+type Boolean bool
+
 const (
 	True  Boolean = true
 	False Boolean = false
 )
-
-type Boolean bool
-
-func New() Boolean {
-	return false
-}
-
-func From(b bool) Boolean {
-	return Boolean(b)
-}
-
-func FromInt(i int) Boolean {
-	return i != 0
-}
-
-func ToInt(b Boolean) int {
-	if b {
-		return 1
-	}
-	return 0
-}
