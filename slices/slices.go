@@ -370,9 +370,3 @@ func Reduce[From, To any](s Slice[From], callbackFn func(To, From) To, initialVa
 	}
 	return reduced
 }
-
-// Copyright 2021 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-type ordered interface {
-	~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr | ~float32 | ~float64 | ~string
-}
