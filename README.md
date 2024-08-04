@@ -24,26 +24,35 @@ They also convert standard library functions into methods.
 
 #### Runtime errors
 
-This package only provides wrappers and do not handle any of these recurring problems:
-
--   panics : triggered panic are still propagated when they occurs.
--   concurrency : if you use these types for concurrent jobs you will have to add your own handlers.
--   nil pointer dereferences : the provided functions & methods does not protect from nil pointer dereferences.
+This package only provides wrappers and do not handle panic. Errors such as out of range, nil pointer dereference or deadlock error will still panic.
 
 #### Your code, your rules
 
-The Go-Types project was designed for any type of project. The use of generics and interfaces completly overthrow the [comparable](https://go.dev/blog/comparable) and [Ordered](https://pkg.go.dev/constraints#Ordered) interfaces.
+The Go-Types project was designed for any type of project. The use of generics and interfaces (any) completly overthrow the [comparable](https://go.dev/blog/comparable) and [Ordered](https://pkg.go.dev/constraints#Ordered) interfaces.
 
 If you wish to use this package for structs, native slices or maps that cannot be compared with [comparison operators](https://go.dev/ref/spec#Comparison_operators), you will have to use functions that use your own comparison rules:
 
 -   Equality rule: Defines whether a value is equal to another.
 -   Ordering rules: Defines which of 2 values is greater/lower than the other.
 
+Example:
+
+```golang
+// Restore Equality for comparable
+func Equals[T comparable](left T,right T) bool { return left == right }
+
+// Does Nothing. Use case: Mapping function
+func Nothing[T comparable](from T) T { return from }
+```
+
+These type of function can be used in a lot of functions/methods ending with "Func".
+
 Methods expecting custom rules/functions have a name ending in "Func". e.g: (slice Slice[T]).ContainsFunc <!--add link that tracks line -->
 
 ## Import
 
-To add this package to your project. Use the `go get` command:
+To add this package to your project. You must have Golang 1.19 or above and
+use the `go get` command:
 
 ```
 go get github.com/cramanan/go-types
@@ -51,7 +60,7 @@ go get github.com/cramanan/go-types
 
 ## Types
 
-Every package imports 2 function that returns their respective types: `New()` and `From()`
+Most packages imports 2 function that returns their respective types: `New()` and `From()`
 
 Every functions return shallow copies and never modify the original value in any way. <sub>(if so, please notify me)</sub>
 
@@ -82,3 +91,5 @@ baz = baz.Append('f','o', 'o') // bar is now Slice[byte]("foobaz")
 //functions
 slices.Map(bar, func(i int) int { return i *2 }) // return Slice[int]{2,4,6}
 ```
+
+Author: [C. Ramananjaona](https://github.com/cramanan)
