@@ -1,6 +1,9 @@
 package slices
 
-import "slices"
+import (
+	"cmp"
+	"slices"
+)
 
 // New returns a new slices.Slice of type T, optionally populated with the provided values.
 //
@@ -81,13 +84,6 @@ func Map[From, To any](s Slice[From], f func(From) To) (mapped Slice[To]) {
 	return mapped
 }
 
-type Ordered interface {
-	~int | ~int8 | ~int16 | ~int32 | ~int64 |
-		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr |
-		~float32 | ~float64 |
-		~string
-}
-
 func Equal[S Slice[E], E comparable](s1, s2 S) bool {
 	return slices.Equal(s1, s2)
 }
@@ -108,7 +104,7 @@ func EqualFunc[S1 ~[]E1, S2 ~[]E2, E1, E2 any](s1 S1, s2 S2, eq func(E1, E2) boo
 // If both slices are equal until one of them ends, the shorter slice is
 // considered less than the longer one.
 // The result is 0 if s1 == s2, -1 if s1 < s2, and +1 if s1 > s2.
-func Compare[S Slice[E], E Ordered](s1, s2 S) int {
+func Compare[S Slice[E], E cmp.Ordered](s1, s2 S) int {
 	return slices.Compare(s1, s2)
 }
 
@@ -216,13 +212,99 @@ func Clip[S Slice[E], E any](s S) S {
 }
 
 // Reverse reverses the elements of the slice in place.
-func Reverse[S Slice[E], E any](s S) S {
-	cop := slices.Clone(s)
-	slices.Reverse(cop)
-	return cop
+func Reverse[S Slice[E], E any](s S) {
+	slices.Reverse(s)
 }
 
 // Concat returns a new slice concatenating the passed in slices.
 func Concat[S Slice[E], E any](s ...E) Slice[E] {
 	return append(Slice[E]{}, s...)
+}
+
+// Copyright 2023 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+//go:generate go run $GOROOT/src/sort/gen_sort_variants.go -generic
+//sort.go
+
+// Sort sorts a slice of any ordered type in ascending order.
+// When sorting floating-point numbers, NaNs are ordered before other values.
+func Sort[S Slice[E], E cmp.Ordered](x S) {
+	slices.Sort(x)
+}
+
+// SortFunc sorts the slice x in ascending order as determined by the cmp
+// function. This sort is not guaranteed to be stable.
+// cmp(a, b) should return a negative number when a < b, a positive number when
+// a > b and zero when a == b.
+//
+// SortFunc requires that cmp is a strict weak ordering.
+// See https://en.wikipedia.org/wiki/Weak_ordering#Strict_weak_orderings.
+func SortFunc[S Slice[E], E any](x S, cmp func(a, b E) int) {
+	slices.SortFunc(x, cmp)
+}
+
+// SortStableFunc sorts the slice x while keeping the original order of equal
+// elements, using cmp to compare elements in the same way as [SortFunc].
+func SortStableFunc[S Slice[E], E any](x S, cmp func(a, b E) int) {
+	slices.SortStableFunc(x, cmp)
+}
+
+// IsSorted reports whether x is sorted in ascending order.
+func IsSorted[S Slice[E], E cmp.Ordered](x S) bool {
+	return slices.IsSorted(x)
+}
+
+// IsSortedFunc reports whether x is sorted in ascending order, with cmp as the
+// comparison function as defined by [SortFunc].
+func IsSortedFunc[S Slice[E], E any](x S, cmp func(a, b E) int) bool {
+	return IsSortedFunc(x, cmp)
+}
+
+// Min returns the minimal value in x. It panics if x is empty.
+// For floating-point numbers, Min propagates NaNs (any NaN value in x
+// forces the output to be NaN).
+func Min[S Slice[E], E cmp.Ordered](x S) E {
+	return Min(x)
+}
+
+// MinFunc returns the minimal value in x, using cmp to compare elements.
+// It panics if x is empty. If there is more than one minimal element
+// according to the cmp function, MinFunc returns the first one.
+func MinFunc[S Slice[E], E any](x S, cmp func(a, b E) int) E {
+	return MinFunc(x, cmp)
+}
+
+// Max returns the maximal value in x. It panics if x is empty.
+// For floating-point E, Max propagates NaNs (any NaN value in x
+// forces the output to be NaN).
+func Max[S Slice[E], E cmp.Ordered](x S) E {
+	return Max(x)
+}
+
+// MaxFunc returns the maximal value in x, using cmp to compare elements.
+// It panics if x is empty. If there is more than one maximal element
+// according to the cmp function, MaxFunc returns the first one.
+func MaxFunc[S Slice[E], E any](x S, cmp func(a, b E) int) E {
+	return MaxFunc(x, cmp)
+}
+
+// BinarySearch searches for target in a sorted slice and returns the position
+// where target is found, or the position where target would appear in the
+// sort order; it also returns a bool saying whether the target is really found
+// in the slice. The slice must be sorted in increasing order.
+func BinarySearch[S Slice[E], E cmp.Ordered](x S, target E) (int, bool) {
+	return slices.BinarySearch(x, target)
+}
+
+// BinarySearchFunc works like [BinarySearch], but uses a custom comparison
+// function. The slice must be sorted in increasing order, where "increasing"
+// is defined by cmp. cmp should return 0 if the slice element matches
+// the target, a negative number if the slice element precedes the target,
+// or a positive number if the slice element follows the target.
+// cmp must implement the same ordering as the slice, such that if
+// cmp(a, t) < 0 and cmp(b, t) >= 0, then a must precede b in the slice.
+func BinarySearchFunc[S Slice[E], E, T any](x S, target T, cmp func(E, T) int) (int, bool) {
+	return BinarySearchFunc(x, target, cmp)
 }
