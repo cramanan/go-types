@@ -7,16 +7,9 @@ import (
 
 type String string
 
-/* Returns a new strings.String */
-func New() String {
-	return String("")
-}
+/* Returns a new empty strings.String */
+func New() String { return "" }
 
-/*
-Returns a new strings.String from given value of type ~string (string and any aliases).
-
-Specifying the type parameter might be redundent
-*/
 func From[S ~string | ~[]byte | ~[]rune](value S) String { return String(value) }
 
 /* Returns the native string type of the strings.String */
