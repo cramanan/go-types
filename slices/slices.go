@@ -311,8 +311,8 @@ func (s1 Slice[T]) EqualFunc(s2 Slice[T], eq func(T, T) bool) bool {
 		return false
 	}
 
-	for i, v1 := range s1 {
-		if !eq(v1, s2[i]) {
+	for i := range s1 {
+		if !eq(s1[i], s2[i]) {
 			return false
 		}
 	}
