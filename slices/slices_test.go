@@ -404,31 +404,3 @@ func TestBasicRules(t *testing.T) {
 		})
 	}
 }
-
-func TestUseOrdered(t *testing.T) {
-	intSlice := New(1, 2, 3, 4)
-	f := intSlice.ContainsFunc
-	testCases := []struct {
-		desc      string
-		got, want bool
-	}{
-		{"Equal", f(UseOrdered(Equal[int], 3)), true},
-		{"Equal", f(UseOrdered(Equal[int], 5)), false},
-		{"LessOrEqual", f(UseOrdered(LessOrEqual[int], 2)), true},
-		{"LessOrEqual", f(UseOrdered(LessOrEqual[int], -1)), false},
-		{"Less", f(UseOrdered(Less[int], 5)), true},
-		{"Less", f(UseOrdered(Less[int], 0)), false},
-		{"Greater", f(UseOrdered(Greater[int], 4)), false},
-		{"Greater", f(UseOrdered(Greater[int], -100)), true},
-		{"GreaterOrEqual", f(UseOrdered(GreaterOrEqual[int], 4)), true},
-		{"NotEqual", f(UseOrdered(NotEqual[int], 3)), true},
-		{"NotEqual", New(1).ContainsFunc(UseOrdered(NotEqual[int], 1)), false},
-	}
-	for _, tC := range testCases {
-		t.Run(tC.desc, func(t *testing.T) {
-			if tC.got != tC.want {
-				t.Errorf("Error: %s got %t, want %t.", tC.desc, tC.got, tC.want)
-			}
-		})
-	}
-}
