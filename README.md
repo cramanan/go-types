@@ -51,20 +51,34 @@ go get github.com/cramanan/go-types
 
 ## Types
 
-### String
+Every package imports 2 function that returns their respective types: `New()` and `From()`
 
-The [strings](/strings/strings.go) package imports 2 functions to create the String type. `New()` and `From()`. <!--add links that track lines-->
+Every functions return shallow copies and never modify the original value in any way. <sub>(if so, please notify me)</sub>
+
+### String
 
 The String type comes bundled with every functions from the standard strings library as methods. e.g:
 
 ```golang
-foo := strings.New() // <=> var foo strings.String = ""
+foo := strings.New() <=> var foo strings.String = ""
 
-foo = strings.From("foo") // <=> foo = "foo"
+foo = strings.From("foo") <=> foo = "foo"
 
 fmt.Println(foo.ToUpper()) // returns "FOO"
 ```
 
-Note that these methods returns shallow copies and do not modify the string in any way.
-
 ### Slice
+
+The Slice type implements common Array manipulation functions and methods like `Filter`, `Map`, `Reduce` and even more. e.g:
+
+```golang
+bar := slices.New(1, 2, 3) <=> var bar slices.Slice[int]{1, 2, 3}
+
+baz := slices.From([]byte("baz")) <=> var baz = Slice[byte]("baz")
+
+// Methods
+baz = baz.Append('f','o', 'o') // bar is now Slice[byte]("foobaz")
+
+//functions
+slices.Map(bar, func(i int) int { return i *2 }) // return Slice[int]{2,4,6}
+```

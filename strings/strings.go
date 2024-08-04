@@ -1,3 +1,30 @@
+// The strings package provides a String type that wraps the built-in Go string type.
+//
+// # String Type
+//
+// The string type is a wrapper around the built-in Go string type.
+//
+// # Example Usage
+//
+//	package main
+//
+//	import (
+//
+//		"fmt"
+//
+//		"github.com/cramanan/go-types/strings"
+//
+//	)
+//
+//	func main() {
+//		// Convert from string
+//		fromString := strings.From{"Hello World!"}
+//
+//		fmt.Printf("%q", fromString) // Output: 'Hello World !'
+//
+//		// Use a method
+//		fromString.At(-1) // returns "!"
+//	}
 package strings
 
 import (
@@ -7,22 +34,20 @@ import (
 
 type String string
 
-/* Returns a new empty strings.String */
+// Returns a new empty strings.String //
 func New() String { return "" }
 
 func From[S ~string | ~[]byte | ~[]rune](value S) String { return String(value) }
 
-/* Returns the native string type of the strings.String */
+// Returns the native string type of the strings.String //
 func (s String) String() string { return string(s) }
 
-/* Returns the length of strings.String */
-func (s String) Length() int { return len(s) }
+// Returns the length of strings.String
+func (s String) Len() int { return len(s) }
 
-/*
-Returns the nth String of String.
-
-Negative indexing is supported (experimental)
-*/
+// Returns the nth String of String.
+//
+// Negative indexing is supported (experimental)
 func (s String) At(n int) String {
 	if n < 0 {
 		n = len(s) + n
@@ -30,11 +55,10 @@ func (s String) At(n int) String {
 	return String(s[n])
 }
 
-/*
-Returns the nth byte of String.
+//
+// Returns the nth byte of String.
 
-Negative indexing is supported (experimental)
-*/
+// Negative indexing is supported (experimental)
 func (s String) ByteAt(n int) byte {
 	if n < 0 {
 		n = len(s) + n
@@ -42,11 +66,10 @@ func (s String) ByteAt(n int) byte {
 	return s[n]
 }
 
-/*
-Returns the nth rune of strings.String.
+//
+// Returns the nth rune of strings.String.
 
-Negative indexing is supported (experimental)
-*/
+// Negative indexing is supported (experimental)
 func (s String) RuneAt(n int) rune {
 	if n < 0 {
 		n = len(s) + n
@@ -54,12 +77,12 @@ func (s String) RuneAt(n int) rune {
 	return rune(s[n])
 }
 
-/* Returns strings.String as a slice of bytes */
+// Returns strings.String as a slice of bytes //
 func (s String) Bytes() []byte {
 	return []byte(s)
 }
 
-/* Concatenates multiple strings.String together without modifying the base String. */
+// Concatenates multiple strings.String together without modifying the base String. //
 func (s String) Concatenate(strs ...string) String {
 	for _, value := range strs {
 		s += String(value)
