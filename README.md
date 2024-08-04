@@ -16,7 +16,7 @@ A collection of "upgraded" Golang types.
 
 ## Description
 
-The Go-Types package contains Object-Oriented types of [Golang types](https://go.dev/ref/spec#Types) with built-in methods that native types doesn't implement.
+Influenced by JavaScript & Rust, the Go-Types package offers Object-Oriented types of [Golang types](https://go.dev/ref/spec#Types) with built-in methods that native types doesn't implement.
 They also convert standard library functions into methods.
 
 ## Import

@@ -69,3 +69,36 @@ func (slice Slice[T]) Reverse() Slice[T] {
 	}
 	return reversed
 }
+
+// IndexFunc returns the first index i satisfying f(s[i]),
+// or -1 if none do.
+func (slice Slice[T]) IndexFunc(f func(T) bool) int {
+	for i := range slice {
+		if f(slice[i]) {
+			return i
+		}
+	}
+	return -1
+}
+
+// ContainsFunc reports whether at least one
+// element e of s satisfies f(e).
+func (slice Slice[T]) ContainsFunc(f func(T) bool) bool {
+	return slice.IndexFunc(f) >= 0
+}
+
+func Map[From, To any](s Slice[From], f func(From) To) (mapped Slice[To]) {
+	for _, v := range s {
+		mapped = append(mapped, f(v))
+	}
+	return mapped
+}
+
+// Reduce reduces a slice to a single value
+func Reduce[From, To any](s Slice[From], callbackFn func(To, From) To, initialValue To) (reduced To) {
+	reduced = initialValue
+	for _, element := range s {
+		reduced = callbackFn(reduced, element)
+	}
+	return reduced
+}

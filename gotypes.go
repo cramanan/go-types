@@ -30,5 +30,26 @@ Documentation: https://pkg.go.dev/github.com/cramanan/go-types/strings
 # Slice
 
 Documentation : https://pkg.go.dev/github.com/cramanan/go-types/slices
+
+	package main
+
+	import (
+
+		"github.com/cramanan/go-types/slices"
+
+	)
+
+	func main() {
+		// Initiate an slice (replace type by wanted type)
+		var newSlice slices.Slice[int] // <=> var newString Slice[type]
+		newSlice = slices.New(1, 2, 3)
+
+		// From converts any slice into slices.Slice
+		fromSlice := slices.From([]rune("Hello"))
+
+		// slices.Slice comes with special methods
+		fromSlice.At(-1)
+		fromSlice.Append(0, 1)
+	}
 */
 package gotypes
