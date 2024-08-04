@@ -370,3 +370,18 @@ func Reduce[From, To any](s Slice[From], callbackFn func(To, From) To, initialVa
 	}
 	return reduced
 }
+
+// Swap replace the elements at index i and j at the same time.
+//
+// This method is used by the data.Sort interface.
+func (s Slice[T]) Swap(i, j int) {
+	if i < 0 {
+		i = len(s) + i
+	}
+
+	if j < 0 {
+		j = len(s) + i
+	}
+
+	s[i], s[j] = s[j], s[i]
+}
