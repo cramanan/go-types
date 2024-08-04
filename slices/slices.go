@@ -1,3 +1,38 @@
+/*
+The slices package provides a generic Slice type that wraps the built-in Go slice type.
+
+# Slice Type
+
+The Slice type is a generic wrapper around the built-in Go slice type. It allows you to work with slices in a type-safe and generic way.
+
+# Type Parameters
+
+  - T : The type of elements in the slice. Can be any type.
+
+# Example Usage
+
+	package main
+
+	import (
+
+		"fmt"
+
+		"github.com/yourusername/slices"
+
+	)
+
+		func main() {
+			// Create a new Slice of integers
+			intSlice := slices.Slice[int]{1, 2, 3, 4, 5}
+
+			fmt.Println(intSlice) // Output: [1 2 3 4 5]
+			// Create a new Slice of strings
+
+			strSlice := slices.Slice[string]{"hello", "world"}
+
+			fmt.Println(strSlice) // Output: [hello world]
+	}
+*/
 package slices
 
 type Slice[T any] []T
@@ -307,6 +342,7 @@ func (s1 Slice[T]) EqualFunc(s2 Slice[T], eq func(T, T) bool) bool {
 	if len(s1) != len(s2) {
 		return false
 	}
+
 	for i, v1 := range s1 {
 		if !eq(v1, s2[i]) {
 			return false
@@ -370,3 +406,13 @@ func Reduce[From, To any](s Slice[From], callbackFn func(To, From) To, initialVa
 	}
 	return reduced
 }
+
+type ordered interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr | ~float32 | ~float64 | ~string
+}
+
+func Equal[T comparable](e1 T, e2 T) bool       { return e1 == e2 }
+func Less[T ordered](e1 T, e2 T) bool           { return e1 < e2 }
+func LessOrEqual[T ordered](e1 T, e2 T) bool    { return e1 <= e2 }
+func Greater[T ordered](e1 T, e2 T) bool        { return e1 > e2 }
+func GreaterOrEqual[T ordered](e1 T, e2 T) bool { return e1 >= e2 }
