@@ -35,6 +35,10 @@ func TestSlicesWithFunctions(t *testing.T) {
 		{"Sort Descending",
 			slices.New(9999999999999999, 10, 10000000, 0).SortFunc(functions.Descending),
 			slices.New(0, 10, 10000000, 9999999999999999).Reverse()},
+		{"slices.IndexFunc", slices.DeleteFunc(
+			slices.New(1, 0, 2, 3, 0, 4, 5, 0, 0, 6, 7, 0, 8, 0),
+			functions.Satisfy(0),
+		), slices.Slice[int]{1, 2, 3, 4, 5, 6, 7, 8}},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {

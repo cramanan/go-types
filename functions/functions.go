@@ -2,54 +2,44 @@
 // matching some go-types callback functions.
 package functions
 
-// The OrderedFunc restores the Ordered operators for functions ending in Funcs
-type OrderedFunc[T Ordered] func(T, T) bool
+import (
+	"cmp"
+)
 
 // '==' as a function.
-func Equal[T comparable](a T, b T) bool { return a == b }
+func Equal[T comparable](x T, y T) bool { return x == y }
 
 // '!=' as a function.
-func NotEqual[T comparable](a T, b T) bool { return a != b }
+func NotEqual[T comparable](x T, y T) bool { return x != y }
 
 // '>' as a function.
-func Greater[T Ordered](a T, b T) bool { return a > b }
+func Greater[T cmp.Ordered](x T, y T) bool { return cmp.Compare(x, y) == 1 }
 
 // '>=' as a function.
-func GreaterOrEqual[T Ordered](a T, b T) bool { return a >= b }
+func GreaterOrEqual[T cmp.Ordered](x, y T) bool { return cmp.Compare(x, y) >= 0 }
 
 // '<' as a function.
-func Less[T Ordered](a T, b T) bool { return a < b }
+func Less[T cmp.Ordered](x T, y T) bool { return cmp.Compare(x, y) == -1 }
 
 // '<=' as a function.
-func LessOrEqual[T Ordered](a T, b T) bool { return a <= b }
+func LessOrEqual[T cmp.Ordered](x T, y T) bool { return cmp.Compare(x, y) <= 0 }
 
-// The CallbackFn is a function used in slice iterations.
-// The generic value T match the value and the integer match the index
-type CallbackFn[T any] func(T, int)
-
-type CompareFn[T any] func(T, T) int
-
-func Ascending[T Ordered](t1, t2 T) int {
-	if t1 > t2 {
-		return 1
+// Satisfy returns a function that checks if a value is equal to the target value.
+// The returned function can be used with functions like strings.IndexFunc to find
+// the index of the target value in a slice.
+func Satisfy[T comparable](target T) func(T) bool {
+	return func(x T) bool {
+		return x == target
 	}
-
-	if t2 > t1 {
-		return -1
-	}
-
-	return 0
-
 }
 
-func Descending[T Ordered](t1, t2 T) int {
-	if t1 < t2 {
-		return 1
-	}
+// Ascending compares two values of type T and returns an integer indicating their order.
+func Ascending[T cmp.Ordered](x, y T) (order int) {
+	return cmp.Compare(x, y)
+}
 
-	if t2 < t1 {
-		return -1
-	}
-
-	return 0
+// Descending compares two values of type T and returns an integer indicating their order in reverse.
+func Descending[T cmp.Ordered](x, y T) (order int) {
+	order = Ascending(x, y)
+	return -order
 }

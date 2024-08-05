@@ -1,6 +1,7 @@
 package functions_test
 
 import (
+	"strings"
 	"testing"
 
 	. "github.com/cramanan/go-types/functions"
@@ -37,6 +38,40 @@ func TestFunctions(t *testing.T) {
 		t.Run(tC.desc, func(t *testing.T) {
 			if tC.got != tC.want {
 				t.Errorf("%s got %t, want %t", tC.desc, tC.got, tC.want)
+			}
+		})
+	}
+}
+
+var longstring = "longStrinGwitHmixofsmaLLandcAps"
+
+func Test_Funcs(t *testing.T) {
+	type TestCase[T any] struct {
+		desc      string
+		got, want T
+	}
+	testCases := []TestCase[int]{
+		{"strings.IndexFunc",
+			strings.IndexFunc(longstring, Satisfy('w')),
+			strings.IndexRune(longstring, 'w'),
+		},
+		{"strings.IndexFunc",
+			strings.IndexFunc(longstring, Satisfy('s')),
+			strings.IndexRune(longstring, 's'),
+		},
+		{"strings.IndexFunc",
+			strings.IndexFunc(longstring, Satisfy('L')),
+			strings.IndexRune(longstring, 'L'),
+		},
+		{"strings.IndexFunc",
+			strings.IndexFunc(longstring, Satisfy('X')),
+			strings.IndexRune(longstring, 'X'),
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			if tC.got != tC.want {
+				t.Errorf("%s got %d, want %d", tC.desc, tC.got, tC.want)
 			}
 		})
 	}

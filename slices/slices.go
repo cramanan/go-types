@@ -34,3 +34,7 @@
 package slices
 
 type Slice[T any] []T
+
+type ISlice[T any] interface {
+	Slice[T]
+}

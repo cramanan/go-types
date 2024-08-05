@@ -10,10 +10,12 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+
+	. "github.com/cramanan/go-types/slices"
 )
 
 func ExampleBinarySearch() {
-	names := []string{"Alice", "Bob", "Vera"}
+	names := Slice[string]{"Alice", "Bob", "Vera"}
 	n, found := slices.BinarySearch(names, "Vera")
 	fmt.Println("Vera:", n, found)
 	n, found = slices.BinarySearch(names, "Bill")
@@ -28,7 +30,7 @@ func ExampleBinarySearchFunc() {
 		Name string
 		Age  int
 	}
-	people := []Person{
+	people := Slice[Person]{
 		{"Alice", 55},
 		{"Bob", 24},
 		{"Gopher", 13},
@@ -42,7 +44,7 @@ func ExampleBinarySearchFunc() {
 }
 
 func ExampleCompact() {
-	seq := []int{0, 1, 1, 2, 3, 5, 8}
+	seq := Slice[int]{0, 1, 1, 2, 3, 5, 8}
 	seq = slices.Compact(seq)
 	fmt.Println(seq)
 	// Output:
@@ -50,7 +52,7 @@ func ExampleCompact() {
 }
 
 func ExampleCompactFunc() {
-	names := []string{"bob", "Bob", "alice", "Vera", "VERA"}
+	names := Slice[string]{"bob", "Bob", "alice", "Vera", "VERA"}
 	names = slices.CompactFunc(names, strings.EqualFold)
 	fmt.Println(names)
 	// Output:
@@ -58,11 +60,11 @@ func ExampleCompactFunc() {
 }
 
 func ExampleCompare() {
-	names := []string{"Alice", "Bob", "Vera"}
-	fmt.Println("Equal:", slices.Compare(names, []string{"Alice", "Bob", "Vera"}))
-	fmt.Println("V < X:", slices.Compare(names, []string{"Alice", "Bob", "Xena"}))
-	fmt.Println("V > C:", slices.Compare(names, []string{"Alice", "Bob", "Cat"}))
-	fmt.Println("3 > 2:", slices.Compare(names, []string{"Alice", "Bob"}))
+	names := Slice[string]{"Alice", "Bob", "Vera"}
+	fmt.Println("Equal:", slices.Compare(names, Slice[string]{"Alice", "Bob", "Vera"}))
+	fmt.Println("V < X:", slices.Compare(names, Slice[string]{"Alice", "Bob", "Xena"}))
+	fmt.Println("V > C:", slices.Compare(names, Slice[string]{"Alice", "Bob", "Cat"}))
+	fmt.Println("3 > 2:", slices.Compare(names, Slice[string]{"Alice", "Bob"}))
 	// Output:
 	// Equal: 0
 	// V < X: -1
@@ -71,8 +73,8 @@ func ExampleCompare() {
 }
 
 func ExampleCompareFunc() {
-	numbers := []int{0, 43, 8}
-	strings := []string{"0", "0", "8"}
+	numbers := Slice[int]{0, 43, 8}
+	strings := Slice[string]{"0", "0", "8"}
 	result := slices.CompareFunc(numbers, strings, func(n int, s string) int {
 		sn, err := strconv.Atoi(s)
 		if err != nil {
@@ -86,7 +88,7 @@ func ExampleCompareFunc() {
 }
 
 func ExampleContainsFunc() {
-	numbers := []int{0, 42, -10, 8}
+	numbers := Slice[int]{0, 42, -10, 8}
 	hasNegative := slices.ContainsFunc(numbers, func(n int) bool {
 		return n < 0
 	})
@@ -101,7 +103,7 @@ func ExampleContainsFunc() {
 }
 
 func ExampleDelete() {
-	letters := []string{"a", "b", "c", "d", "e"}
+	letters := Slice[string]{"a", "b", "c", "d", "e"}
 	letters = slices.Delete(letters, 1, 4)
 	fmt.Println(letters)
 	// Output:
@@ -109,7 +111,7 @@ func ExampleDelete() {
 }
 
 func ExampleDeleteFunc() {
-	seq := []int{0, 1, 1, 2, 3, 5, 8}
+	seq := Slice[int]{0, 1, 1, 2, 3, 5, 8}
 	seq = slices.DeleteFunc(seq, func(n int) bool {
 		return n%2 != 0 // delete the odd numbers
 	})
@@ -119,17 +121,17 @@ func ExampleDeleteFunc() {
 }
 
 func ExampleEqual() {
-	numbers := []int{0, 42, 8}
-	fmt.Println(slices.Equal(numbers, []int{0, 42, 8}))
-	fmt.Println(slices.Equal(numbers, []int{10}))
+	numbers := Slice[int]{0, 42, 8}
+	fmt.Println(slices.Equal(numbers, Slice[int]{0, 42, 8}))
+	fmt.Println(slices.Equal(numbers, Slice[int]{10}))
 	// Output:
 	// true
 	// false
 }
 
 func ExampleEqualFunc() {
-	numbers := []int{0, 42, 8}
-	strings := []string{"000", "42", "0o10"}
+	numbers := Slice[int]{0, 42, 8}
+	strings := Slice[string]{"000", "42", "0o10"}
 	equal := slices.EqualFunc(numbers, strings, func(n int, s string) bool {
 		sn, err := strconv.ParseInt(s, 0, 64)
 		if err != nil {
@@ -143,7 +145,7 @@ func ExampleEqualFunc() {
 }
 
 func ExampleIndex() {
-	numbers := []int{0, 42, 8}
+	numbers := Slice[int]{0, 42, 8}
 	fmt.Println(slices.Index(numbers, 8))
 	fmt.Println(slices.Index(numbers, 7))
 	// Output:
@@ -152,7 +154,7 @@ func ExampleIndex() {
 }
 
 func ExampleIndexFunc() {
-	numbers := []int{0, 42, -10, 8}
+	numbers := Slice[int]{0, 42, -10, 8}
 	i := slices.IndexFunc(numbers, func(n int) bool {
 		return n < 0
 	})
@@ -162,7 +164,7 @@ func ExampleIndexFunc() {
 }
 
 func ExampleInsert() {
-	names := []string{"Alice", "Bob", "Vera"}
+	names := Slice[string]{"Alice", "Bob", "Vera"}
 	names = slices.Insert(names, 1, "Bill", "Billie")
 	names = slices.Insert(names, len(names), "Zac")
 	fmt.Println(names)
@@ -171,15 +173,15 @@ func ExampleInsert() {
 }
 
 func ExampleIsSorted() {
-	fmt.Println(slices.IsSorted([]string{"Alice", "Bob", "Vera"}))
-	fmt.Println(slices.IsSorted([]int{0, 2, 1}))
+	fmt.Println(slices.IsSorted(Slice[string]{"Alice", "Bob", "Vera"}))
+	fmt.Println(slices.IsSorted(Slice[int]{0, 2, 1}))
 	// Output:
 	// true
 	// false
 }
 
 func ExampleIsSortedFunc() {
-	names := []string{"alice", "Bob", "VERA"}
+	names := Slice[string]{"alice", "Bob", "VERA"}
 	isSortedInsensitive := slices.IsSortedFunc(names, func(a, b string) int {
 		return cmp.Compare(strings.ToLower(a), strings.ToLower(b))
 	})
@@ -191,7 +193,7 @@ func ExampleIsSortedFunc() {
 }
 
 func ExampleMax() {
-	numbers := []int{0, 42, -10, 8}
+	numbers := Slice[int]{0, 42, -10, 8}
 	fmt.Println(slices.Max(numbers))
 	// Output:
 	// 42
@@ -202,7 +204,7 @@ func ExampleMaxFunc() {
 		Name string
 		Age  int
 	}
-	people := []Person{
+	people := Slice[Person]{
 		{"Gopher", 13},
 		{"Alice", 55},
 		{"Vera", 24},
@@ -217,7 +219,7 @@ func ExampleMaxFunc() {
 }
 
 func ExampleMin() {
-	numbers := []int{0, 42, -10, 8}
+	numbers := Slice[int]{0, 42, -10, 8}
 	fmt.Println(slices.Min(numbers))
 	// Output:
 	// -10
@@ -228,7 +230,7 @@ func ExampleMinFunc() {
 		Name string
 		Age  int
 	}
-	people := []Person{
+	people := Slice[Person]{
 		{"Gopher", 13},
 		{"Bob", 5},
 		{"Vera", 24},
@@ -243,7 +245,7 @@ func ExampleMinFunc() {
 }
 
 func ExampleReplace() {
-	names := []string{"Alice", "Bob", "Vera", "Zac"}
+	names := Slice[string]{"Alice", "Bob", "Vera", "Zac"}
 	names = slices.Replace(names, 1, 3, "Bill", "Billie", "Cat")
 	fmt.Println(names)
 	// Output:
@@ -251,7 +253,7 @@ func ExampleReplace() {
 }
 
 func ExampleReverse() {
-	names := []string{"alice", "Bob", "VERA"}
+	names := Slice[string]{"alice", "Bob", "VERA"}
 	slices.Reverse(names)
 	fmt.Println(names)
 	// Output:
@@ -267,7 +269,7 @@ func ExampleSort() {
 }
 
 func ExampleSortFunc_caseInsensitive() {
-	names := []string{"Bob", "alice", "VERA"}
+	names := Slice[string]{"Bob", "alice", "VERA"}
 	slices.SortFunc(names, func(a, b string) int {
 		return cmp.Compare(strings.ToLower(a), strings.ToLower(b))
 	})
@@ -281,7 +283,7 @@ func ExampleSortFunc_multiField() {
 		Name string
 		Age  int
 	}
-	people := []Person{
+	people := Slice[Person]{
 		{"Gopher", 13},
 		{"Alice", 55},
 		{"Bob", 24},
@@ -304,7 +306,7 @@ func ExampleSortStableFunc() {
 		Name string
 		Age  int
 	}
-	people := []Person{
+	people := Slice[Person]{
 		{"Gopher", 13},
 		{"Alice", 20},
 		{"Bob", 24},

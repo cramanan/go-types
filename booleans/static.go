@@ -11,9 +11,7 @@ func From[B ~bool](b B) Boolean {
 }
 
 // From converts int into to Boolean.
-func FromInt(i int) Boolean {
-	return i != 0
-}
+func FromInt(i int) Boolean { return i != 0 }
 
 // ToInt convert b into an integer.
 func ToInt(b Boolean) int {
