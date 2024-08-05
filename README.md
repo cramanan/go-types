@@ -12,8 +12,10 @@ A collection of "upgraded" Golang types.
     -   [Informations](#informations)
 -   [Import](#import)
 -   [Types](#types)
+    -   [Boolean]()
     -   [String](#string)
     -   [Slice](#slice)
+    -   [Functions]()
 
 ## Description
 
@@ -24,16 +26,16 @@ They also convert standard library functions into methods.
 
 #### Runtime errors
 
-This package only provides wrappers and do not handle panic. Errors such as out of range, nil pointer dereference or deadlock error will still panic.
+This package only provides wrappers and do not handle panic. Errors such as out of range, nil pointer dereference or deadlock errors will still panic.
 
 #### Your code, your rules
 
-The Go-Types project was designed for any type of project. The use of generics and interfaces (any) for the slices.Unordered type completly overthrows the [comparable](https://go.dev/blog/comparable) and [Ordered](https://pkg.go.dev/cmp#Ordered) interfaces.
+The Go-Types project was designed for any type of project. The use of generics and interfaces (any) type completly overthrows the [comparable](https://go.dev/blog/comparable) and [Ordered](https://pkg.go.dev/cmp#Ordered) interfaces.
 
-If you wish to use this package for structs, native slices or maps that cannot be compared with [comparison operators](https://go.dev/ref/spec#Comparison_operators), you will have to use functions that use your own comparison rules:
+If you wish to use this package to compare complex data types that cannot be compared with [comparison operators](https://go.dev/ref/spec#Comparison_operators), you will have to use functions that use your own comparison rules:
 
--   Equality rule: Defines whether a value is equal to another.
 -   Ordering rules: Defines which of 2 values is greater/lower than the other.
+-   Equality rule (optionnal): Defines whether a value is equal to another.
 
 Example:
 
@@ -47,15 +49,21 @@ func Nothing[T comparable](from T) T { return from }
 
 These type of function can be used in a lot of functions/methods ending with "Func".
 
-Methods expecting custom rules/functions have a name ending in "Func". e.g: (slice Slice[T]).ContainsFunc <!--add link that tracks line -->
+Methods expecting custom rules/functions often have a name ending in "Func". e.g: (slice Slice[T]).ContainsFunc <!--add link that tracks line -->
 
 ## Import
 
-To add this package to your project. You must have Golang 1.19 or above and
-use the `go get` command:
+To add this package to your project. You must select the version that matches your project version:
+
+| Golang versions | Go-Types Version |
+| --------------- | ---------------- |
+| 1.19 / 1.20     | v1.x.x           |
+| 1.21            | v2.x.x           |
+
+Once you find your version, use the `go get` command:
 
 ```
-go get github.com/cramanan/go-types
+go get github.com/cramanan/go-types@<version>
 ```
 
 ## Types
@@ -63,6 +71,8 @@ go get github.com/cramanan/go-types
 Most packages imports 2 function that returns their respective types: `New()` and `From()`
 
 Every functions return shallow copies and never modify the original value in any way. <sub>(if so, please notify me)</sub>
+
+### Boolean
 
 ### String
 
