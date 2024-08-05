@@ -2,13 +2,47 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package slices
+package slices_test
 
 import (
 	"math"
+	"reflect"
+	"strconv"
 	"strings"
 	"testing"
+
+	. "github.com/cramanan/go-types/slices"
+	"golang.org/x/exp/constraints"
 )
+
+// Compare returns
+//
+//	-1 if x is less than y,
+//	 0 if x equals y,
+//	+1 if x is greater than y.
+//
+// For floating-point anys, a NaN is considered less than any non-NaN,
+// a NaN is considered equal to a NaN, and -0.0 is equal to 0.0.
+func compare[T constraints.Ordered](x, y T) int {
+	xNaN := isNaN(x)
+	yNaN := isNaN(y)
+	if xNaN && yNaN {
+		return 0
+	}
+	if xNaN || x < y {
+		return -1
+	}
+	if yNaN || x > y {
+		return +1
+	}
+	return 0
+}
+
+// isNaN reports whether x is a NaN without requiring the math package.
+// This will always return false if T is not floating-point.
+func isNaN[T constraints.Ordered](x T) bool {
+	return x != x
+}
 
 var equalIntTests = []struct {
 	s1, s2 Slice[int]
@@ -1055,3 +1089,50 @@ func TestInference(t *testing.T) {
 		t.Errorf("Reverse(%v) = %v, want %v", S{4, 5, 6}, s2, want)
 	}
 }
+
+func TestMap(t *testing.T) {
+	// Test with int slice and doubling function
+	intSlice := Slice[int]{1, 2, 3, 4, 5}
+
+	double := func(x int, _ int) int { return x * 2 }
+	result := Map(intSlice, double)
+
+	expected := []int{2, 4, 6, 8, 10}
+
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("Expected %v, got %v", expected, result)
+	}
+
+	// Test with string slice and uppercase function
+
+	stringSlice := []string{"hello", "world", "go"}
+
+	uppercase := func(s string, _ int) string { return strings.ToUpper(s) }
+
+	result2 := Map(stringSlice, uppercase)
+
+	expected2 := []string{"HELLO", "WORLD", "GO"}
+
+	if !reflect.DeepEqual(result2, expected2) {
+		t.Errorf("Expected %v, got %v", expected, result)
+	}
+
+	// Test with custom type and mapping function
+	type Person struct {
+		Name string
+		Age  int
+	}
+
+	personSlice := []Person{{"John", 25}, {"Jane", 30}, {"Bob", 35}}
+	fullName := func(p Person, _ int) string { return p.Name + " " + strconv.Itoa(p.Age) }
+
+	result3 := Map(personSlice, fullName)
+	expected3 := []string{"John 25", "Jane 30", "Bob 35"}
+
+	if !reflect.DeepEqual(result3, expected3) {
+		t.Errorf("Expected %v, got %v", expected, result)
+	}
+
+}
+
+// Function to test custom type inferences

@@ -19,3 +19,5 @@ type CallbackFunc[T any] func(T, int)
 
 // SatisfyFunc returns a predicate function for a given value of type T.
 type SatisfyFunc[T comparable] func(T) func(T) bool
+
+type MappingFunc[O, I any] func(I, int) O
