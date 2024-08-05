@@ -14,11 +14,9 @@ type Ordered[O cmp.Ordered] slices.Slice[O]
 //
 // s := Ordered[int]{1, 2, 3, 4, 5}
 // s.Len()  // returns 5
-func (slice Ordered[T]) Len() int {
-	return len(slice)
-}
+func (s Ordered[T]) Len() int { return len(s) }
 
-func (a Ordered[O]) Less(i, j int) bool { return a[i] < a[j] }
+func (s Ordered[O]) Less(i, j int) bool { return s[i] < s[j] }
 
 // Swap replace the elements at index i and j at the same time.
 //

@@ -28,7 +28,7 @@ This package only provides wrappers and do not handle panic. Errors such as out 
 
 #### Your code, your rules
 
-The Go-Types project was designed for any type of project. The use of generics and interfaces (any) completly overthrow the [comparable](https://go.dev/blog/comparable) and [Ordered](https://pkg.go.dev/constraints#Ordered) interfaces.
+The Go-Types project was designed for any type of project. The use of generics and interfaces (any) for the slices.Unordered type completly overthrows the [comparable](https://go.dev/blog/comparable) and [Ordered](https://pkg.go.dev/cmp#Ordered) interfaces.
 
 If you wish to use this package for structs, native slices or maps that cannot be compared with [comparison operators](https://go.dev/ref/spec#Comparison_operators), you will have to use functions that use your own comparison rules:
 

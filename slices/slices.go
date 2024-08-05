@@ -1,4 +1,4 @@
-// The slices package provides a generic Slice type that wraps the built-in Go slice type.
+// The slices package provides generic Slice wrapper for the built-in Go slice type and slices functions.
 //
 // # Slice Type
 //
@@ -11,6 +11,7 @@ package slices
 
 import (
 	"cmp"
+
 	"slices"
 )
 
@@ -227,8 +228,19 @@ func Reverse[S ISlice[E], E any](s S) {
 }
 
 // Concat returns a new slice concatenating the passed in slices.
-func Concat[S ISlice[E], E any](s ...E) S {
-	return append(S{}, s...)
+func Concat[I ISlice[Type]](s ...I) (cat I) {
+	for _, v := range s {
+		cat = append(cat, v)
+	}
+	return cat
+}
+
+// Concat returns a new slice concatenating the passed in slices.
+func (s Slice[T]) Concat(sls ...Slice[T]) (cat Slice[T]) {
+	for _, v := range sls {
+		cat = append(cat, v...)
+	}
+	return cat
 }
 
 // Copyright 2023 The Go Authors. All rights reserved.
