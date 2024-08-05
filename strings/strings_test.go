@@ -8,11 +8,12 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
-	"slices"
 	"strconv"
 	"testing"
 	"unicode"
 	"unicode/utf8"
+
+	"golang.org/x/exp/slices"
 
 	. "github.com/cramanan/go-types/strings"
 )

@@ -10,12 +10,10 @@
 package slices
 
 import (
-	"cmp"
-
-	"slices"
+	"golang.org/x/exp/slices"
 )
 
-type Type interface{ any | cmp.Ordered }
+type Type interface{ any | Ordered }
 
 type Slice[T Type] []T
 
@@ -108,14 +106,14 @@ func EqualFunc[S1 ~[]E1, S2 ~[]E2, E1, E2 any](s1 S1, s2 S2, eq func(E1, E2) boo
 	return slices.EqualFunc(s1, s2, eq)
 }
 
-// Compare compares the elements of s1 and s2, using [cmp.Compare] on each pair
+// Compare compares the elements of s1 and s2, using [Compare] on each pair
 // of elements. The elements are compared sequentially, starting at index 0,
 // until one element is not equal to the other.
 // The result of comparing the first non-matching elements is returned.
 // If both slices are equal until one of them ends, the shorter slice is
 // considered less than the longer one.
 // The result is 0 if s1 == s2, -1 if s1 < s2, and +1 if s1 > s2.
-func Compare[S ISlice[E], E cmp.Ordered](s1, s2 S) int {
+func Compare[S ISlice[E], E Ordered](s1, s2 S) int {
 	return slices.Compare(s1, s2)
 }
 
@@ -252,7 +250,7 @@ func (s Slice[T]) Concat(sls ...Slice[T]) (cat Slice[T]) {
 
 // Sort sorts a slice of any ordered type in ascending order.
 // When sorting floating-point numbers, NaNs are ordered before other values.
-func Sort[S ISlice[E], E cmp.Ordered](x S) {
+func Sort[S ISlice[E], E Ordered](x S) {
 	slices.Sort(x)
 }
 
@@ -274,7 +272,7 @@ func SortStableFunc[S ISlice[E], E any](x S, cmp func(a, b E) int) {
 }
 
 // IsSorted reports whether x is sorted in ascending order.
-func IsSorted[S ISlice[E], E cmp.Ordered](x S) bool {
+func IsSorted[S ISlice[E], E Ordered](x S) bool {
 	return slices.IsSorted(x)
 }
 
@@ -287,7 +285,7 @@ func IsSortedFunc[S ISlice[E], E any](x S, cmp func(a, b E) int) bool {
 // Min returns the minimal value in x. It panics if x is empty.
 // For floating-point numbers, Min propagates NaNs (any NaN value in x
 // forces the output to be NaN).
-func Min[S ISlice[E], E cmp.Ordered](x S) E {
+func Min[S ISlice[E], E Ordered](x S) E {
 	return Min(x)
 }
 
@@ -301,7 +299,7 @@ func MinFunc[S ISlice[E], E any](x S, cmp func(a, b E) int) E {
 // Max returns the maximal value in x. It panics if x is empty.
 // For floating-point E, Max propagates NaNs (any NaN value in x
 // forces the output to be NaN).
-func Max[S ISlice[E], E cmp.Ordered](x S) E {
+func Max[S ISlice[E], E Ordered](x S) E {
 	return Max(x)
 }
 
@@ -314,7 +312,7 @@ func MaxFunc[S ISlice[E], E any](x S, cmp func(a, b E) int) E {
 
 // BinarySearchFunc works like [BinarySearch], but uses a custom comparison
 // function. The slice must be sorted in increasing order, where "increasing"
-// is defined by cmp. cmp should return 0 if the slice element matches
+// is defined by  cmp should return 0 if the slice element matches
 // the target, a negative number if the slice element precedes the target,
 // or a positive number if the slice element follows the target.
 // cmp must implement the same ordering as the slice, such that if
@@ -325,7 +323,7 @@ func BinarySearchFunc[S ISlice[E], E, T any](x S, target T, cmp func(E, T) int) 
 
 // BinarySearchFunc works like [BinarySearch], but uses a custom comparison
 // function. The slice must be sorted in increasing order, where "increasing"
-// is defined by cmp. cmp should return 0 if the slice element matches
+// is defined by  cmp should return 0 if the slice element matches
 // the target, a negative number if the slice element precedes the target,
 // or a positive number if the slice element follows the target.
 // cmp must implement the same ordering as the slice, such that if
@@ -461,6 +459,66 @@ func (s Slice[O]) MaxFunc(cmp func(a, b O) int) O {
 	return slices.MaxFunc(s, cmp)
 }
 
-func BinarySearch[S ~[]E, E cmp.Ordered](x S, target E) (int, bool) {
+func BinarySearch[S ~[]E, E Ordered](x S, target E) (int, bool) {
 	return slices.BinarySearch(x, target)
+}
+
+// Copyright 2023 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// Package cmp provides types and functions related to comparing
+// ordered values.
+// package cmp
+
+// Ordered is a constraint that permits any ordered type: any type
+// that supports the operators < <= >= >.
+// If future releases of Go add new ordered types,
+// this constraint will be modified to include them.
+//
+// Note that floating-point types may contain NaN ("not-a-number") values.
+// An operator such as == or < will always report false when
+// comparing a NaN value with any other value, NaN or not.
+// See the [Compare] function for a consistent way to compare NaN values.
+type Ordered interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 |
+		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr |
+		~float32 | ~float64 |
+		~string
+}
+
+// Less reports whether x is less than y.
+// For floating-point types, a NaN is considered less than any non-NaN,
+// and -0.0 is not less than (is equal to) 0.0.
+func Less[T Ordered](x, y T) bool {
+	return (isNaN(x) && !isNaN(y)) || x < y
+}
+
+// Compare returns
+//
+//	-1 if x is less than y,
+//	 0 if x equals y,
+//	+1 if x is greater than y.
+//
+// For floating-point types, a NaN is considered less than any non-NaN,
+// a NaN is considered equal to a NaN, and -0.0 is equal to 0.0.
+func compare[T Ordered](x, y T) int {
+	xNaN := isNaN(x)
+	yNaN := isNaN(y)
+	if xNaN && yNaN {
+		return 0
+	}
+	if xNaN || x < y {
+		return -1
+	}
+	if yNaN || x > y {
+		return +1
+	}
+	return 0
+}
+
+// isNaN reports whether x is a NaN without requiring the math package.
+// This will always return false if T is not floating-point.
+func isNaN[T Ordered](x T) bool {
+	return x != x
 }

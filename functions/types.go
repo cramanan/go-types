@@ -1,7 +1,5 @@
 package functions
 
-import "cmp"
-
 // ComparisonFunc is a function type that takes two values of type T and returns an
 
 // integer indicating their relative order. The return value is:
@@ -11,7 +9,7 @@ import "cmp"
 type ComparisonFunc[T any] func(T, T) int
 
 // The OrderedFunc restores the Ordered operators for functions ending in Funcs
-type OrderedFunc[T cmp.Ordered] func(T, T) bool
+type OrderedFunc[T Ordered] func(T, T) bool
 
 // CallbackFunc is a function type that takes a value of type T and an integer index
 // as arguments. It is often used as a callback function to process each element in

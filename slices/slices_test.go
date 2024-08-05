@@ -5,7 +5,6 @@
 package slices
 
 import (
-	"cmp"
 	"math"
 	"strings"
 	"testing"
@@ -303,12 +302,12 @@ func TestCompareFunc(t *testing.T) {
 	}
 
 	for _, test := range compareIntTests {
-		if got := CompareFunc(test.s1, test.s2, cmp.Compare[int]); got != test.want {
+		if got := CompareFunc(test.s1, test.s2, compare[int]); got != test.want {
 			t.Errorf("CompareFunc(%v, %v, cmp[int]) = %d, want %d", test.s1, test.s2, got, test.want)
 		}
 	}
 	for _, test := range compareFloatTests {
-		if got := CompareFunc(test.s1, test.s2, cmp.Compare[float64]); got != test.want {
+		if got := CompareFunc(test.s1, test.s2, compare[float64]); got != test.want {
 			t.Errorf("CompareFunc(%v, %v, cmp[float64]) = %d, want %d", test.s1, test.s2, got, test.want)
 		}
 	}
@@ -1037,13 +1036,13 @@ func TestReplaceGrowthRate(t *testing.T) {
 }
 
 func apply[T any](v T, f func(T)) {
-	f(v)
+	f(T(v))
 }
 
 // Test type inference with a named slice type.
 func TestInference(t *testing.T) {
 	s1 := Slice[int]{1, 2, 3}
-	apply(s1, Reverse)
+	apply(s1, Reverse[Slice[int], int])
 	want := Slice[int]{3, 2, 1}
 	if !Equal(s1, want) {
 		t.Errorf("Reverse(%v) = %v, want %v", Slice[int]{1, 2, 3}, s1, want)
@@ -1051,7 +1050,7 @@ func TestInference(t *testing.T) {
 
 	type S Slice[int]
 	s2 := S{4, 5, 6}
-	apply(s2, Reverse)
+	apply(s2, Reverse[S, int])
 	if want := (S{6, 5, 4}); !Equal(s2, want) {
 		t.Errorf("Reverse(%v) = %v, want %v", S{4, 5, 6}, s2, want)
 	}

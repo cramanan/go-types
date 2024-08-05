@@ -1,9 +1,10 @@
 package ordered_test
 
 import (
-	"cmp"
 	"reflect"
 	"testing"
+
+	"golang.org/x/exp/constraints"
 
 	. "github.com/cramanan/go-types/slices/ordered"
 )
@@ -13,7 +14,7 @@ func eq[T any](s1, s2 []T) bool {
 }
 
 func TestNew(t *testing.T) {
-	type TestCase[T cmp.Ordered] struct {
+	type TestCase[T constraints.Ordered] struct {
 		desc      string
 		got, want Ordered[T]
 	}
@@ -36,7 +37,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestFrom(t *testing.T) {
-	type TestCase[T cmp.Ordered] struct {
+	type TestCase[T constraints.Ordered] struct {
 		desc      string
 		got, want Ordered[T]
 	}
@@ -45,7 +46,7 @@ func TestFrom(t *testing.T) {
 		{"Empty", From([]float64{}), Ordered[float64]{}},
 
 		{"Populated", From([]float64{1.0, 2.0, 3.0, 4.0}), Ordered[float64]{1, 2, 3, 4}},
-		{"Populated", From(New(1., 2, 3, 4, 5, 6)), Ordered[float64]{1, 2, 3, 4, 5, 6}},
+		{"Populated", From(New[float64](1., 2, 3, 4, 5, 6)), Ordered[float64]{1, 2, 3, 4, 5, 6}},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {

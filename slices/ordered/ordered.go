@@ -1,12 +1,11 @@
 package ordered
 
 import (
-	"cmp"
-
 	"github.com/cramanan/go-types/slices"
+	"golang.org/x/exp/constraints"
 )
 
-type Ordered[O cmp.Ordered] slices.Slice[O]
+type Ordered[O constraints.Ordered] slices.Slice[O]
 
 // Len returns the length of the Ordered.
 //
@@ -42,11 +41,11 @@ func (s Ordered[T]) Swap(i, j int) {
 //	s := slices.New(1, 2, 3) // returns a ISlice[int] containing [1, 2, 3]
 //
 // s := slices.New[string]() // returns an empty ISlice[string]
-func New[T cmp.Ordered](values ...T) Ordered[T] {
+func New[T constraints.Ordered](values ...T) Ordered[T] {
 	return append(*new(Ordered[T]), values...)
 }
 
-func From[O cmp.Ordered](s Ordered[O]) Ordered[O] {
+func From[O constraints.Ordered](s Ordered[O]) Ordered[O] {
 	return Ordered[O](s)
 }
 
@@ -222,7 +221,7 @@ func (s1 Ordered[O]) Equal(s2 Ordered[O]) bool {
 	return slices.Equal(s1, s2)
 }
 
-// Compare compares the elements of s1 and s2, using [cmp.Compare] on each pair
+// Compare compares the elements of s1 and s2, using [constraints.Compare] on each pair
 // of elements. The elements are compared sequentially, starting at index 0,
 // until one element is not equal to the other.
 // The result of comparing the first non-matching elements is returned.
