@@ -1,12 +1,4 @@
-// The slices package provides generic Slice wrapper for the built-in Go slice any and slices functions.
-//
-// # Slice any
-//
-// The Slice any is a generic wrapper around the built-in Go slice any. It allows you to work with slices in a any-safe and generic way.
-//
-// # any Parameters
-//
-//   - T : The any of elements in the slice. Can be any any or ordered.
+// The slices package provides generic Slice wrapper for the built-in Go slice type and slices functions.
 package slices
 
 import (
@@ -14,9 +6,21 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+// Slice is a generic type that wraps a slice of any type T.
+// It provides a way to work with slices in a type-safe manner.
+//
+// Example:
+//
+//	// Create a Slice of integers
+//	intSlice := Slice[int]{1, 2, 3}
+//
+//	// Create a Slice of strings
+//	strSlice := Slice[string]{"a", "b", "c"}
+//
+//	// Use the Slice as a regular slice
+//	fmt.Println(intSlice[0]) // prints 1
+//	fmt.Println(strSlice[1]) // prints "b"
 type Slice[T any] []T
-
-type ISlice[T any] interface{ ~[]T }
 
 // Map applies a transformation function to each element of the input slice and returns a new slice with the results.
 //
@@ -35,33 +39,32 @@ type ISlice[T any] interface{ ~[]T }
 //	// doubled is now ISlice[int]{2, 4, 6, 8, 10}
 //
 // Note: The order of elements in the output ISlice is the same as in the input ISlice.
-func Map[SI ISlice[I], I, O any](s SI, callbackFn func(I, int) O) (mapped []O) {
+func Map[SI ~[]I, I, O any](s SI, callbackFn func(I, int) O) (mapped []O) {
 	for i, v := range s {
 		mapped = append(mapped, callbackFn(v, i))
 	}
 	return mapped
 }
 
-// Reduce applies a reduction function to each element of the input ISlice[From] and returns a single value of any To.
+func New[T any](values ...T) Slice[T] {
+	return append(*new(Slice[T]), values...)
+}
+
+// func From[S ~[O], O any](s S) Slice[O] {
+// 	return s
+// }
+
+// Reduce applies a reduction function to each element of the input ~[From] and returns a single value of any To.
 //
 // The reduction function is called with two arguments: the accumulator (initially set to initialValue) and the current element's value.
 //
 // It should return the new accumulator value.
 //
-// The reduction process starts with the initialValue and iterates over the input ISlice, applying the reduction function to each element.
+// The reduction process starts with the initialValue and iterates over the input ~, applying the reduction function to each element.
 //
 // The final accumulator value is returned as the result.
 //
-// Example:
-//
-//	s := ISlice[int]{1, 2, 3, 4, 5}
-//
-//	sum := func(acc int, current int) int { return acc + current }
-//
-//	result := Reduce(s, sum, 0)
-//	// result is now 15 (the sum of all elements in the ISlice)
-//
-// Note: If the input ISlice is empty, the initialValue is returned as the result.
+// Note: If the input slice is empty, the initialValue is returned as the result.
 func Reduce[I any, O any](
 	s []I,
 	callbackFn func(O, I, int) O,
@@ -219,14 +222,6 @@ func Concat[I ~[]any](s ...I) (cat I) {
 	return cat
 }
 
-// Concat returns a new slice concatenating the passed in slices.
-func (s Slice[T]) Concat(sls ...Slice[T]) (cat Slice[T]) {
-	for _, v := range sls {
-		cat = append(cat, v...)
-	}
-	return cat
-}
-
 // Copyright 2023 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
@@ -307,240 +302,8 @@ func BinarySearchFunc[S ~[]E, E, T any](x S, target T, cmp func(E, T) int) (int,
 	return BinarySearchFunc(x, target, cmp)
 }
 
-// BinarySearchFunc works like [BinarySearch], but uses a custom comparison
-// function. The slice must be sorted in increasing order, where "increasing"
-// is defined by  cmp should return 0 if the slice element matches
-// the target, a negative number if the slice element precedes the target,
-// or a positive number if the slice element follows the target.
-// cmp must implement the same ordering as the slice, such that if
-// cmp(a, t) < 0 and cmp(b, t) >= 0, then a must precede b in the slice.
-func (s Slice[O]) BinarySearchFunc(target O, cmp func(O, O) int) (int, bool) {
-	return slices.BinarySearchFunc(s, target, cmp)
-}
-
-// EqualFunc reports whether two slices are equal using an equality
-// function on each pair of elements. If the lengths are different,
-// EqualFunc returns false. Otherwise, the elements are compared in
-// increasing index order, and the comparison stops at the first index
-// for which eq returns false.
-func (s1 Slice[O]) EqualFunc(s2 Slice[O], eq func(O, O) bool) bool {
-	return slices.EqualFunc(s1, s2, eq)
-}
-
-// CompareFunc is like [Compare] but uses a custom comparison function on each
-// pair of elements.
-// The result is the first non-zero result of cmp; if cmp always
-// returns 0 the result is 0 if len(s1) == len(s2), -1 if len(s1) < len(s2),
-// and +1 if len(s1) > len(s2).
-func (s1 Slice[O]) CompareFunc(s2 Slice[O], cmp func(O, O) int) int {
-	return slices.CompareFunc(s1, s2, cmp)
-}
-
-// IndexFunc returns the first index i satisfying f(s[i]),
-// or -1 if none do.
-func (s Slice[O]) IndexFunc(f func(O) bool) int {
-	return slices.IndexFunc(s, f)
-}
-
-// ContainsFunc reports whether at least one
-// element e of s satisfies f(e).
-func (s Slice[O]) ContainsFunc(f func(O) bool) bool {
-	return slices.ContainsFunc(s, f)
-}
-
-// Insert inserts the values v... into s at index i,
-// returning the modified slice.
-// The elements at s[i:] are shifted up to make room.
-// In the returned slice r, r[i] == v[0],
-// and r[i+len(v)] == value originally at r[i].
-// Insert panics if i is out of range.
-// This function is O(len(s) + len(v)).
-func (s Slice[O]) Insert(i int, v ...O) Slice[O] {
-	return slices.Insert(s, i, v...)
-}
-
-// Delete removes the elements s[i:j] from s, returning the modified slice.
-// Delete panics if j > len(s) or s[i:j] is not a valid slice of s.
-// Delete is O(len(s)-i), so if many items must be deleted, it is better to
-// make a single call deleting them all together than to delete one at a time.
-// Delete zeroes the elements s[len(s)-(j-i):len(s)].
-func (s Slice[O]) Delete(i, j int) Slice[O] {
-	return slices.Delete(s, i, j)
-}
-
-// DeleteFunc removes any elements from s for which del returns true,
-// returning the modified slice.
-// DeleteFunc zeroes the elements between the new length and the original length.
-func (s Slice[O]) DeleteFunc(del func(O) bool) Slice[O] {
-	return slices.DeleteFunc(s, del)
-}
-
-// Replace replaces the elements s[i:j] by the given v, and returns the
-// modified slice.
-// Replace panics if j > len(s) or s[i:j] is not a valid slice of s.
-// When len(v) < (j-i), Replace zeroes the elements between the new length and the original length.
-func (s Slice[O]) Replace(i, j int, v ...O) Slice[O] {
-	return slices.Replace(s, i, j, v...)
-}
-
-// CompactFunc is like [Compact] but uses an equality function to compare elements.
-// For runs of elements that compare equal, CompactFunc keeps the first one.
-// CompactFunc zeroes the elements between the new length and the original length.
-func (s Slice[O]) CompactFunc(eq func(O, O) bool) Slice[O] {
-	return slices.CompactFunc(s, eq)
-}
-
-// Grow increases the slice's capacity, if necessary, to guarantee space for
-// another n elements. After Grow(n), at least n elements can be appended
-// to the slice without another allocation. If n is negative or too large to
-// allocate the memory, Grow panics.
-func (s Slice[O]) Grow(n int) Slice[O] {
-	return slices.Grow(s, n)
-}
-
-// Clip removes unused capacity from the slice, returning s[:len(s):len(s)].
-func (s Slice[O]) Clip() Slice[O] {
-	return slices.Clip(s)
-}
-
-// Reverse reverses the elements of the slice in place.
-func (s Slice[O]) Reverse() {
-	slices.Reverse(s)
-}
-
-// SortFunc sorts the slice x in ascending order as determined by the cmp
-// function. This sort is not guaranteed to be stable.
-// cmp(a, b) should return a negative number when a < b, a positive number when
-// a > b and zero when a == b.
-//
-// SortFunc requires that cmp is a strict weak ordering.
-// See https://en.wikipedia.org/wiki/Weak_ordering#Strict_weak_orderings.
-func (s Slice[O]) SortFunc(cmp func(a, b O) int) {
-	slices.SortFunc(s, cmp)
-}
-
-// SortStableFunc sorts the slice x while keeping the original order of equal
-// elements, using cmp to compare elements in the same way as [SortFunc].
-func (x Slice[O]) SortStableFunc(cmp func(a, b O) int) {
-	slices.SortStableFunc(x, cmp)
-}
-
-// IsSortedFunc reports whether x is sorted in ascending order, with cmp as the
-// comparison function as defined by [SortFunc].
-func (s Slice[O]) IsSortedFunc(cmp func(a, b O) int) bool {
-	return slices.IsSortedFunc(s, cmp)
-}
-
-// MinFunc returns the minimal value in x, using cmp to compare elements.
-// It panics if x is empty. If there is more than one minimal element
-// according to the cmp function, MinFunc returns the first one.
-func (s Slice[O]) MinFunc(cmp func(a, b O) int) O {
-	return slices.MinFunc(s, cmp)
-}
-
-// MaxFunc returns the maximal value in x, using cmp to compare elements.
-// It panics if x is empty. If there is more than one maximal element
-// according to the cmp function, MaxFunc returns the first one.
-func (s Slice[O]) MaxFunc(cmp func(a, b O) int) O {
-	return slices.MaxFunc(s, cmp)
-}
-
 func BinarySearch[S ~[]E, E constraints.Ordered](x S, target E) (int, bool) {
 	return slices.BinarySearch(x, target)
-}
-
-// Prepend adds the given values to the beginning of the Ordered.
-//
-// This method returns a new Ordered containing the prepended values followed by the original elements.
-//
-// The original Ordered is not modified.
-//
-// Example:
-//
-//	s := Ordered[int]{1, 2, 3}
-//
-// s = s.Prepend(0) // returns a Ordered[int] containing [0, 1, 2, 3]
-func (slice Slice[T]) Prepend(values ...T) Slice[T] {
-	return append(values, slice...)
-}
-
-// At returns the element at the specified index in the Ordered.
-//
-// The index can be either positive (from the start of the Ordered) or negative (from the end of the Ordered).
-//
-// If the index is negative, it is treated as an offset from the end of the Ordered.
-//
-// Example:
-//
-//	s := Ordered[int]{1, 2, 3, 4, 5}
-//
-//	s.At(0)  // returns 1
-//	s.At(-1) // returns 5
-//	s.At(2)  // returns 3
-//
-// Note: This method does not perform bounds checking for performance reasons.
-func (slice Slice[T]) At(n int) T {
-	if n < 0 {
-		n = len(slice) + n
-	}
-	return slice[n]
-}
-
-// The append methods appends elements to the end of a slice. If it has sufficient capacity, the destination is resliced to accommodate the new elements. If it does not, a new underlying array will be allocated. Append returns the updated slice. It is therefore necessary to store the result of append, often in the variable holding the slice itself:
-
-// slice = append(slice, elem1, elem2)
-// slice = append(slice, anotherSlice...)
-// As a special case, it is legal to append a string to a byte slice, like this:
-
-// slice = append([]byte("hello "), "world"...)
-func (slice Slice[T]) Append(values ...T) Slice[T] {
-	return append(slice, values...)
-}
-
-func (slice Slice[T]) ForEach(callbackFn func(value T, index int)) {
-	for idx, v := range slice {
-		callbackFn(v, idx)
-	}
-}
-
-func (slice Slice[T]) Filter(callbackFn func(element T, index int) bool) (filtered Slice[T]) {
-	for idx, value := range slice {
-		if callbackFn(value, idx) {
-			filtered = append(filtered, value)
-		}
-	}
-	return filtered
-}
-func (slice Slice[T]) Some(callbackFn func(element T, index int) bool) bool {
-	for idx, value := range slice {
-		if callbackFn(value, idx) {
-			return true
-		}
-	}
-	return false
-}
-
-func (slice Slice[T]) Every(callbackFn func(element T, index int) bool) bool {
-	for idx, value := range slice {
-		if !callbackFn(value, idx) {
-			return false
-		}
-	}
-	return true
-}
-
-func (slice Slice[O]) Map(callbackFn func(O, int) O) (mapped Slice[O]) {
-	for i, value := range slice {
-		mapped = append(mapped, callbackFn(value, i))
-	}
-	return mapped
-}
-func (s Slice[o]) Len() int { return len(s) }
-
-// Clone returns a copy of the slice.
-// The elements are copied using assignment, so this is a shallow clone.
-func (s Slice[O]) Clone() Slice[O] {
-	return slices.Clone(s)
 }
 
 // Less reports whether x is less than y.
@@ -554,8 +317,4 @@ func Less[T constraints.Ordered](x, y T) bool {
 // This will always return false if T is not floating-point.
 func isNaN[T constraints.Ordered](x T) bool {
 	return x != x
-}
-
-func (s Slice[T]) Slice() []T {
-	return s
 }

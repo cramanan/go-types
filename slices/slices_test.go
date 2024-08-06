@@ -1134,5 +1134,3 @@ func TestMap(t *testing.T) {
 	}
 
 }
-
-// Function to test custom type inferences
