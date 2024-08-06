@@ -213,7 +213,14 @@ func (slice Slice[T]) Filter(callbackFn func(element T, index int) bool) (filter
 	return filtered
 }
 
+// Some returns true if at least one element in the Ordered slice satisfies the callback function.
+//
+// The Some method iterates over the elements of the Ordered slice, passing each element and its index to the callback function.
+// If the callback function returns true for any element, Some immediately returns true. If the callback function never returns true, Some returns false.
 func (slice Slice[T]) Some(callbackFn func(element T, index int) bool) bool {
+	if callbackFn == nil {
+		panic("callback function is nil")
+	}
 	for idx, value := range slice {
 		if callbackFn(value, idx) {
 			return true
@@ -222,7 +229,14 @@ func (slice Slice[T]) Some(callbackFn func(element T, index int) bool) bool {
 	return false
 }
 
+// Every returns true if every element in the Ordered slice satisfies the callback function.
+//
+// The Every method iterates over the elements of the Ordered slice, passing each element and its index to the callback function.
+// If the callback function returns false for any element, Every immediately returns false. If the callback function returns true for all elements, Every returns true.
 func (slice Slice[T]) Every(callbackFn func(element T, index int) bool) bool {
+	if callbackFn == nil {
+		panic("callback function is nil")
+	}
 	for idx, value := range slice {
 		if !callbackFn(value, idx) {
 			return false
@@ -231,6 +245,12 @@ func (slice Slice[T]) Every(callbackFn func(element T, index int) bool) bool {
 	return true
 }
 
+// Map applies a given function to each element of the slice and returns a new slice with the results.
+//
+// The callback function is called for each element in the slice, with the element and its index as arguments.
+// The returned values from the callback function are collected in a new slice, which is returned by Map.
+//
+// Note that the original slice is not modified.
 func (slice Slice[O]) Map(callbackFn func(O, int) O) (mapped Slice[O]) {
 	for i, v := range slice {
 		mapped = append(mapped, callbackFn(v, i))
@@ -274,6 +294,10 @@ func (s Slice[O]) Clone() Slice[O] {
 	return slices.Clone(s)
 }
 
+// CountFunc returns the count of elements in the Ordered slice that satisfy the comparison function with the target element.
+//
+// The CountFunc method iterates over the elements of the Ordered slice, comparing each element with the target element using the provided comparison function.
+// If the comparison function returns true for an element, it is counted.
 func (s Slice[T]) CountFunc(target T, cmp func(T, T) bool) (count int) {
 	for _, v := range s {
 		if cmp(v, target) {
@@ -283,6 +307,9 @@ func (s Slice[T]) CountFunc(target T, cmp func(T, T) bool) (count int) {
 	return count
 }
 
+// Fill returns a new Ordered slice where all elements are replaced with the given value.
+//
+// The Fill method creates a new slice and appends the given value for each element in the original slice.
 func (s Slice[T]) Fill(value T) (copy Slice[T]) {
 	for range s {
 		copy = append(copy, value)
@@ -290,6 +317,9 @@ func (s Slice[T]) Fill(value T) (copy Slice[T]) {
 	return copy
 }
 
+// Range returns a new Ordered slice that includes elements from index i up to, but not including, index j.
+//
+// If i or j is negative, it is treated as an offset from the end of the slice.
 func (s Slice[T]) Range(i, j int) (s2 Slice[T]) {
 	if i < 0 {
 		i = len(s) + i

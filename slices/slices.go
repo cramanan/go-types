@@ -22,54 +22,35 @@ import (
 //	fmt.Println(strSlice[1]) // prints "b"
 type Slice[T any] []T
 
-// Map applies a transformation function to each element of the input slice and returns a new slice with the results.
-//
-// The transformation function is called with one argument: the current element's value.
-//
-// It should return the transformed value of type To.
-//
-// Example:
-//
-//	s := ISlice[int]{1, 2, 3, 4, 5}
-//
-//	double := func(x int) int { return x * 2 }
-//
-//	doubled := Map(s, double)
-//
-//	// doubled is now ISlice[int]{2, 4, 6, 8, 10}
-//
-// Note: The order of elements in the output ISlice is the same as in the input ISlice.
+// New creates a new Slice from the provided values.
+func New[T any](values ...T) Slice[T] { return values }
+
+// From creates a Slice from a given slice or array.
+func From[S ~[]O, O any](s S) Slice[O] { return Slice[O](s) }
+
+// Map applies a callback function to each element of the input slice or array,
+// and returns a new slice with the results.
 func Map[SI ~[]I, I, O any](s SI, callbackFn func(I, int) O) (mapped []O) {
+	if callbackFn == nil {
+		panic("callback funtion is nil")
+	}
 	for i, v := range s {
 		mapped = append(mapped, callbackFn(v, i))
 	}
 	return mapped
 }
 
-func New[T any](values ...T) Slice[T] {
-	return values
-}
-
-func From[S ~[]O, O any](s S) Slice[O] {
-	return Slice[O](s)
-}
-
-// Reduce applies a reduction function to each element of the input ~[From] and returns a single value of any To.
-//
-// The reduction function is called with two arguments: the accumulator (initially set to initialValue) and the current element's value.
-//
-// It should return the new accumulator value.
-//
-// The reduction process starts with the initialValue and iterates over the input ~, applying the reduction function to each element.
-//
-// The final accumulator value is returned as the result.
-//
-// Note: If the input slice is empty, the initialValue is returned as the result.
+// Reduce applies a callback function to each element of the input slice,
+// starting from an initial value, and returns the reduced value.
 func Reduce[I any, O any](
 	s []I,
 	callbackFn func(O, I, int) O,
 	initialValue O,
 ) (reduced O) {
+
+	if callbackFn == nil {
+		panic("callback funtion is nil")
+	}
 	reduced = initialValue
 	for i, element := range s {
 		reduced = callbackFn(reduced, element, i)
@@ -225,8 +206,6 @@ func Concat[I ~[]any](s ...I) (cat I) {
 // Copyright 2023 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
-//go:generate go run $GOROOT/src/sort/gen_sort_variants.go -generic
 //sort.go
 
 // Sort sorts a slice of any ordered any in ascending order.
@@ -302,6 +281,10 @@ func BinarySearchFunc[S ~[]E, E, T any](x S, target T, cmp func(E, T) int) (int,
 	return BinarySearchFunc(x, target, cmp)
 }
 
+// BinarySearch searches for target in a sorted slice and returns the position
+// where target is found, or the position where target would appear in the
+// sort order; it also returns a bool saying whether the target is really found
+// in the slice. The slice must be sorted in increasing order.
 func BinarySearch[S ~[]E, E constraints.Ordered](x S, target E) (int, bool) {
 	return slices.BinarySearch(x, target)
 }
@@ -315,6 +298,4 @@ func Less[T constraints.Ordered](x, y T) bool {
 
 // isNaN reports whether x is a NaN without requiring the math package.
 // This will always return false if T is not floating-point.
-func isNaN[T constraints.Ordered](x T) bool {
-	return x != x
-}
+func isNaN[T constraints.Ordered](x T) bool { return x != x }

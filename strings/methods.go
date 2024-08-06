@@ -227,7 +227,7 @@ func (s String) LastIndexFunc(f func(rune) bool) int {
 // according to the mapping function. If mapping returns a negative value, the character is
 // dropped from the string with no replacement.
 func (s String) Map(mapping func(rune) rune) String {
-	return String(Map(mapping, (s)))
+	return String(Map(mapping, s))
 }
 
 // Repeat returns a new string consisting of count copies of the string s.
@@ -402,7 +402,7 @@ func (s String) TrimLeft(cutset String) String {
 // TrimLeftFunc returns a slice of the string s with all leading
 // Unicode code points c satisfying f(c) removed.
 func (s String) TrimLeftFunc(f func(rune) bool) String {
-	return String(TrimLeftFunc((s), f))
+	return String(TrimLeftFunc(s, f))
 }
 
 // TrimPrefix returns s without the provided leading prefix string.

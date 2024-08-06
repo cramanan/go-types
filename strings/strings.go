@@ -27,9 +27,22 @@
 //	}
 package strings
 
+// String is a type that wraps the built-in string type,
+// allowing for custom methods and behaviors to be defined.
 type String string
 
-// Returns a new empty String //
+// IString is an interface that can be satisfied by types that are assignable to string, []byte, or []rune.
+type IString interface {
+	~string | ~[]byte | ~[]rune
+}
+
+// IChar is an interface that can be satisfied by types that are assignable to byte or rune.
+type IChar interface {
+	~byte | ~rune
+}
+
+// New returns a new, empty String.
 func New() String { return "" }
 
-func From[S ~string | ~[]byte | ~[]rune](value S) String { return String(value) }
+// From converts a value of type S, which can be a string, []byte, or []rune, to a String.
+func From[S IString](value S) String { return String(value) }

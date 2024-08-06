@@ -5,53 +5,30 @@ import (
 	"unicode"
 )
 
-type IString interface {
-	~string | ~[]byte | ~[]rune
-}
+// Len returns the length of the string | []byte | []rune s.
+func Len[S IString](s S) int { return len(s) }
 
-type IChar interface {
-	~byte | ~rune
-}
-
-// Returns the length of strings.String
-func Len(s String) int { return len(s) }
-
-// Returns the nth String of String.
-//
-// Negative indexing is supported (experimental)
-func At(s String, n int) String {
+func At[C IChar, S IString](s S, n int) C {
 	if n < 0 {
 		n = len(s) + n
 	}
-	return String(s[n])
+	return C(string(s)[n])
 }
 
-// Returns the nth byte of String.
-//
-// Negative indexing is supported (experimental)
-func ByteAt(s String, n int) byte {
-	if n < 0 {
-		n = len(s) + n
+// Concatenate concatenates a variable number of strings into a single string.
+// The type of the resulting string is determined by the type parameter T.
+func Concatenate[T IString, S IString](strs ...S) T {
+	toString := *new([]string)
+	for _, s := range strs {
+		toString = append(toString, string(s))
 	}
-	return s[n]
-}
 
-// Returns the nth rune of strings.String.
-//
-// Negative indexing is supported (experimental)
-func RuneAt(s String, n int) rune {
-	if n < 0 {
-		n = len(s) + n
+	res := ""
+	for _, s := range toString {
+		res += s
 	}
-	return rune(s[n])
-}
 
-// Concatenates multiple strings.String together without modifying the base String. //
-func Concatenate(s String, strs ...string) String {
-	for _, value := range strs {
-		s += String(value)
-	}
-	return s
+	return T(res)
 }
 
 // Clone returns a fresh copy of s.
@@ -218,10 +195,11 @@ func LastIndexAny[S IString | IChar](s S, chars S) int {
 // Map returns a copy of the string s with all its characters modified
 // according to the mapping function. If mapping returns a negative value, the character is
 // dropped from the string with no replacement.
-func Map[C IChar, S IString](f func(C) C, s S) S {
-	fn := func(c rune) rune { return rune(f(C(c))) }
-
-	return S(strings.Map(fn, string(s)))
+func Map[S IString](callbackFn func(rune) rune, s S) S {
+	if callbackFn == nil {
+		panic("callback function is nil")
+	}
+	return S(strings.Map(callbackFn, string(s)))
 }
 
 // Repeat returns a new string consisting of count copies of the string s.
@@ -263,13 +241,11 @@ func ReplaceAll[S1 IString, S2 IString | IChar](s S1, old, new S2) S1 {
 // It is equivalent to [SplitN] with a count of -1.
 //
 // To split around the first instance of a separator, see Cut.
-func Split[S1 IString, S2 IString | IChar](s S1, sep S2) []S1 {
-	native := strings.Split(string(s), string(sep))
-	strs := make([]S1, len(native))
-	for i, value := range native {
-		strs[i] = S1(value)
+func Split[S1 IString, S2 IString | IChar](s S1, sep S2) (res []S1) {
+	for _, value := range strings.Split(string(s), string(sep)) {
+		res = append(res, S1(value))
 	}
-	return strs
+	return res
 }
 
 // SplitAfter slices s into all substrings after each instance of sep and
@@ -282,13 +258,11 @@ func Split[S1 IString, S2 IString | IChar](s S1, sep S2) []S1 {
 // both s and sep are empty, SplitAfter returns an empty slice.
 //
 // It is equivalent to [SplitAfterN] with a count of -1.
-func SplitAfter[S1 IString, S2 IString | IChar](s S1, sep S2) []S1 {
-	native := strings.SplitAfter(string(s), string(sep))
-	strs := make([]S1, len(native))
-	for i, value := range native {
-		strs[i] = S1(value)
+func SplitAfter[S1 IString, S2 IString | IChar](s S1, sep S2) (res []S1) {
+	for _, value := range strings.SplitAfter(string(s), string(sep)) {
+		res = append(res, S1(value))
 	}
-	return strs
+	return res
 }
 
 // SplitAfterN slices s into substrings after each instance of sep and
@@ -302,13 +276,11 @@ func SplitAfter[S1 IString, S2 IString | IChar](s S1, sep S2) []S1 {
 //
 // Edge cases for s and sep (for example, empty strings) are handled
 // as described in the documentation for SplitAfter.
-func SplitAfterN[S1 IString, S2 IString | IChar](s S1, sep S2, n int) []S1 {
-	native := strings.SplitAfterN(string(s), string(sep), n)
-	strs := make([]S1, len(native))
-	for i, value := range native {
-		strs[i] = S1(value)
+func SplitAfterN[S1 IString, S2 IString | IChar](s S1, sep S2, n int) (res []S1) {
+	for _, value := range strings.SplitAfterN(string(s), string(sep), n) {
+		res = append(res, S1(value))
 	}
-	return strs
+	return res
 }
 
 // SplitN slices s into substrings separated by sep and returns a slice of
@@ -324,19 +296,15 @@ func SplitAfterN[S1 IString, S2 IString | IChar](s S1, sep S2, n int) []S1 {
 // as described in the documentation for [Split].
 //
 // To split around the first instance of a separator, see Cut.
-func SplitN[S1 IString, S2 IString | IChar](s S1, sep S2, n int) []S1 {
-	native := strings.SplitN(string(s), string(sep), n)
-	strs := make([]S1, len(native))
-	for i, value := range native {
-		strs[i] = S1(value)
+func SplitN[S1 IString, S2 IString | IChar](s S1, sep S2, n int) (res []S1) {
+	for _, value := range strings.SplitN(string(s), string(sep), n) {
+		res = append(res, S1(value))
 	}
-	return strs
+	return res
 }
 
 // ToLower returns s with all Unicode letters mapped to their lower case.
-func ToLower[S IString](s S) S {
-	return S(strings.ToLower(string(s)))
-}
+func ToLower[S IString](s S) S { return S(strings.ToLower(string(s))) }
 
 // ToLowerSpecial returns a copy of the string s with all Unicode letters mapped to their
 // lower case using the case mapping specified by c.
@@ -346,9 +314,7 @@ func ToLowerSpecial[S IString](c unicode.SpecialCase, s S) S {
 
 // ToTitle returns a copy of the string s with all Unicode letters mapped to
 // their Unicode title case.
-func ToTitle[S IString](s S) S {
-	return S(strings.ToTitle(string(s)))
-}
+func ToTitle[S IString](s S) S { return S(strings.ToTitle(string(s))) }
 
 // ToTitleSpecial returns a copy of the string s with all Unicode letters mapped to their
 // Unicode title case, giving priority to the special casing rules.
@@ -357,9 +323,7 @@ func ToTitleSpecial[S IString](c unicode.SpecialCase, s S) S {
 }
 
 // ToUpper returns s with all Unicode letters mapped to their upper case.
-func ToUpper[S IString](s S) S {
-	return S(strings.ToUpper(string(s)))
-}
+func ToUpper[S IString](s S) S { return S(strings.ToUpper(string(s))) }
 
 // ToUpperSpecial returns a copy of the string s with all Unicode letters mapped to their
 // upper case using the case mapping specified by c.
@@ -381,24 +345,28 @@ func Trim[S1 IString, S2 IString | IChar](s S1, cutset S2) S1 {
 
 // TrimFunc returns a slice of the string s with all leading
 // and trailing Unicode code points c satisfying f(c) removed.
-func TrimFunc[S IString, C IChar](s S, f func(C) bool) S {
-	fn := func(c rune) bool { return f(C(c)) }
-	return S(strings.TrimFunc(string(s), fn))
+func TrimFunc[S IString](s S, callbackFn func(rune) bool) S {
+	if callbackFn == nil {
+		panic("callback function is nil")
+	}
+	return S(strings.TrimFunc(string(s), callbackFn))
 }
 
 // TrimLeft returns a slice of the string s with all leading
 // Unicode code points contained in cutset removed.
 //
 // To remove a prefix, use [TrimPrefix] instead.
-func TrimLeft[S IString, C IString | IChar](s S, cutset C) S {
+func TrimLeft[C IString, S IString](s S, cutset C) S {
 	return S(strings.TrimLeft(string(s), string(cutset)))
 }
 
 // TrimLeftFunc returns a slice of the string s with all leading
 // Unicode code points c satisfying f(c) removed.
-func TrimLeftFunc[S IString, C IChar](s S, f func(C) bool) S {
-	fn := func(c rune) bool { return f(C(c)) }
-	return S(strings.TrimLeftFunc(string(s), fn))
+func TrimLeftFunc[S IString](s S, callbackFn func(rune) bool) S {
+	if callbackFn == nil {
+		panic("callback function is nil")
+	}
+	return S(strings.TrimLeftFunc(string(s), callbackFn))
 }
 
 // TrimPrefix returns s without the provided leading prefix string.
@@ -417,9 +385,11 @@ func TrimRight[S1 IString, S2 IString | IChar](s S1, cutset S2) S1 {
 
 // TrimRightFunc returns a slice of the string s with all trailing
 // Unicode code points c satisfying f(c) removed.
-func TrimRightFunc[S IString, C IChar](s S, f func(C) bool) String {
-	fn := func(c rune) bool { return f(C(c)) }
-	return String(strings.TrimRightFunc(string(s), fn))
+func TrimRightFunc[S IString](s S, callbackFn func(rune) bool) String {
+	if callbackFn == nil {
+		panic("callback function is nil")
+	}
+	return String(strings.TrimRightFunc(string(s), callbackFn))
 }
 
 // TrimSpace returns a slice of the string s, with all leading

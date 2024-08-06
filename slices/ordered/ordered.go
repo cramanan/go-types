@@ -5,13 +5,24 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+// Ordered is a slice of ordered elements.
+//
+// The Ordered type is a generic slice that can be used to store elements that implement the constraints.Ordered interface.
+// This includes types such as int, float64, string, and others that have a natural ordering.
 type Ordered[O constraints.Ordered] []O
 
+// New creates a new Ordered slice from the provided values.
+//
+// The New function takes a variable number of arguments of type T, which must implement the constraints.Ordered interface.
+// It returns a new Ordered slice containing the provided values.
 func New[T constraints.Ordered](values ...T) Ordered[T] { return values }
 
-func From[O ~[]T, T constraints.Ordered](slice O) Ordered[T] { return Ordered[T](slice) }
+// From creates a new Ordered slice from an existing slice.
+//
+// The From function takes a slice of type `slice` that is equivalent to `[]T`, where `T` implements the constraints.Ordered interface.
+// It returns a new Ordered slice containing the elements of the original slice.
+func From[slice ~[]T, T constraints.Ordered](s slice) Ordered[T] { return Ordered[T](s) }
 
-// Concat returns a new slice concatenating the passed in slices.
 func (s Ordered[T]) Concat(sls ...Ordered[T]) Ordered[T] {
 	for _, v := range sls {
 		s = append(s, v...)
@@ -165,6 +176,10 @@ func (s Ordered[O]) SortFunc(cmp func(a, b O) int) {
 	slices.SortFunc(s, cmp)
 }
 
+// Sort returns a new sorted Ordered slice.
+//
+// The Sort method creates a clone of the original Ordered slice, sorts it using the slices.Sort function,
+// and returns the sorted clone. The original slice remains unchanged.
 func (s Ordered[O]) Sort() Ordered[O] {
 	clone := s.Clone()
 	slices.Sort(clone)
@@ -183,6 +198,7 @@ func (s Ordered[O]) IsSortedFunc(cmp func(a, b O) int) bool {
 	return slices.IsSortedFunc(s, cmp)
 }
 
+// IsSorted reports whether x is sorted in ascending order.
 func (s Ordered[O]) IsSorted() bool {
 	return slices.IsSorted(s)
 }
@@ -194,6 +210,7 @@ func (s Ordered[O]) MinFunc(cmp func(a, b O) int) O {
 	return slices.MinFunc(s, cmp)
 }
 
+// Min returns the minimal value in x. It panics if x is empty. For floating-point numbers, Min propagates NaNs (any NaN value in x forces the output to be NaN).
 func (s Ordered[O]) Min() O {
 	return slices.Min(s)
 }
@@ -205,6 +222,7 @@ func (s Ordered[O]) MaxFunc(cmp func(a, b O) int) O {
 	return slices.MaxFunc(s, cmp)
 }
 
+// Max returns the maximal value in x. It panics if x is empty. For floating-point E, Max propagates NaNs (any NaN value in x forces the output to be NaN).
 func (s Ordered[O]) Max() O {
 	return slices.Max(s)
 }
@@ -249,6 +267,9 @@ func (slice Ordered[T]) Append(values ...T) Ordered[T] {
 // ForEach iterates over the slice and calls the provided callback function for each element.
 // The callback function is called with the current element and its index as arguments.
 func (slice Ordered[T]) ForEach(callbackFn func(value T, index int)) {
+	if callbackFn == nil {
+		panic("callback function is nil")
+	}
 	for idx, v := range slice {
 		callbackFn(v, idx)
 	}
@@ -258,6 +279,9 @@ func (slice Ordered[T]) ForEach(callbackFn func(value T, index int)) {
 // The callbackFn is called for each element in the Ordered, with the element and its index as arguments.
 // The order of elements in the resulting Ordered is the same as in the original Ordered.
 func (slice Ordered[T]) Filter(callbackFn func(element T, index int) bool) (filtered Ordered[T]) {
+	if callbackFn == nil {
+		panic("callback function is nil")
+	}
 	for idx, value := range slice {
 		if callbackFn(value, idx) {
 			filtered = append(filtered, value)
@@ -266,7 +290,14 @@ func (slice Ordered[T]) Filter(callbackFn func(element T, index int) bool) (filt
 	return filtered
 }
 
+// Some returns true if at least one element in the Ordered slice satisfies the callback function.
+//
+// The Some method iterates over the elements of the Ordered slice, passing each element and its index to the callback function.
+// If the callback function returns true for any element, Some immediately returns true. If the callback function never returns true, Some returns false.
 func (slice Ordered[T]) Some(callbackFn func(element T, index int) bool) bool {
+	if callbackFn == nil {
+		panic("callback function is nil")
+	}
 	for idx, value := range slice {
 		if callbackFn(value, idx) {
 			return true
@@ -275,7 +306,14 @@ func (slice Ordered[T]) Some(callbackFn func(element T, index int) bool) bool {
 	return false
 }
 
+// Every returns true if every element in the Ordered slice satisfies the callback function.
+//
+// The Every method iterates over the elements of the Ordered slice, passing each element and its index to the callback function.
+// If the callback function returns false for any element, Every immediately returns false. If the callback function returns true for all elements, Every returns true.
 func (slice Ordered[T]) Every(callbackFn func(element T, index int) bool) bool {
+	if callbackFn == nil {
+		panic("callback function is nil")
+	}
 	for idx, value := range slice {
 		if !callbackFn(value, idx) {
 			return false
@@ -284,7 +322,16 @@ func (slice Ordered[T]) Every(callbackFn func(element T, index int) bool) bool {
 	return true
 }
 
+// Map applies a given function to each element of the slice and returns a new slice with the results.
+//
+// The callback function is called for each element in the slice, with the element and its index as arguments.
+// The returned values from the callback function are collected in a new slice, which is returned by Map.
+//
+// Note that the original slice is not modified.
 func (slice Ordered[O]) Map(callbackFn func(O, int) O) (mapped Ordered[O]) {
+	if callbackFn == nil {
+		panic("callback function is nil")
+	}
 	for i, v := range slice {
 		mapped = append(mapped, callbackFn(v, i))
 	}
@@ -330,15 +377,26 @@ func (s Ordered[O]) Clone() Ordered[O] {
 	return slices.Clone(s)
 }
 
-func (s Ordered[O]) CountFunc(target O, cmp func(O, O) bool) (count int) {
+// CountFunc returns the count of elements in the Ordered slice that satisfy the comparison function with the target element.
+//
+// The CountFunc method iterates over the elements of the Ordered slice, comparing each element with the target element using the provided comparison function.
+// If the comparison function returns true for an element, it is counted.
+func (s Ordered[O]) CountFunc(target O, callbackFn func(O, O) bool) (count int) {
+	if callbackFn == nil {
+		panic("callback function is nil")
+	}
 	for _, v := range s {
-		if cmp(v, target) {
+		if callbackFn(v, target) {
 			count++
 		}
 	}
 	return count
 }
 
+// Count returns the count of occurrences of the target element in the Ordered slice.
+//
+// The Count method iterates over the elements of the Ordered slice, comparing each element with the target element for equality.
+// If an element is equal to the target, it is counted.
 func (s Ordered[O]) Count(target O) (count int) {
 	for _, v := range s {
 		if v == target {
@@ -348,6 +406,9 @@ func (s Ordered[O]) Count(target O) (count int) {
 	return count
 }
 
+// Fill returns a new Ordered slice where all elements are replaced with the given value.
+//
+// The Fill method creates a new slice and appends the given value for each element in the original slice.
 func (s Ordered[O]) Fill(value O) (copy Ordered[O]) {
 	for range s {
 		copy = append(copy, value)
@@ -355,6 +416,9 @@ func (s Ordered[O]) Fill(value O) (copy Ordered[O]) {
 	return copy
 }
 
+// Range returns a new Ordered slice that includes elements from index i up to, but not including, index j.
+//
+// If i or j is negative, it is treated as an offset from the end of the slice.
 func (s Ordered[O]) Range(i, j int) (s2 Ordered[O]) {
 	if i < 0 {
 		i = len(s) + i
@@ -371,40 +435,47 @@ func (s Ordered[O]) Slice() []O {
 	return s
 }
 
-// experimental
-// Range generates a sequence of numbers from start to end with a given step.
-// The step value must be non-zero.
-func Range[T constraints.Integer | constraints.Float](start, end, step T) (rng []T) {
-	absStep := step
-	if step < 0 {
-		absStep = -step
-	}
+// // experimental
+// // Range generates a sequence of numbers from start to end with a given step.
+// // The step value must be non-zero.
+// func Range[
+// 	B constraints.Integer | constraints.Float,
+// 	S constraints.Integer | constraints.Float,
 
-	// Swap start and end if step is negative and start < end
-	if step < 0 && start < end {
-		start, end = end, start
-	}
+// ](start, end B, step S) (rng []S) {
+// 	stype := S(start)
+// 	etype := S(end)
 
-	switch {
-	case step > 0:
-		for i := start; i < end; i += absStep {
-			rng = append(rng, i)
-		}
-	case step < 0:
-		for i := start; i > end; i -= absStep {
-			rng = append(rng, i)
-		}
-	default:
-		panic("step cannot be zero")
-	}
-	return rng
-}
+// 	absStep := step
+// 	if step < 0 {
+// 		absStep = -step
+// 	}
 
-// experimental
-func RangeBetween[T constraints.Integer | constraints.Float](start T, end T, step T) (rng []T) {
-	if end > start && step < 0 {
-		step = -step
-	}
-	return Range(start, end, step)
+// 	// Swap start and end if step is negative and start < end
+// 	if step < 0 && stype < etype {
+// 		stype, etype = etype, stype
+// 	}
 
-}
+// 	switch {
+// 	case step > 0:
+// 		for i := stype; i < etype; i += absStep {
+// 			rng = append(rng, i)
+// 		}
+// 	case step < 0:
+// 		for i := stype; i > etype; i -= absStep {
+// 			rng = append(rng, i)
+// 		}
+// 	default:
+// 		panic("step cannot be zero")
+// 	}
+// 	return rng
+// }
+
+// // experimental
+// func RangeBetween[T constraints.Integer | constraints.Float](start T, end T, step T) (rng []T) {
+// 	if end > start && step < 0 {
+// 		step = -step
+// 	}
+// 	return Range(start, end, step)
+
+// }
