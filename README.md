@@ -10,11 +10,11 @@ A collection of "upgraded" Golang types.
 -   [Overview](#overview)
 -   [Description](#description)
 -   [Import](#import)
--   [Types & Functions](#types--functions)
-    -   [Boolean]()
+-   [Packages](#packages)
+    -   [Boolean](#boolean)
     -   [String](#string)
     -   [Slice](#slice)
-    -   [Functions]()
+    -   [Functions](#functions)
 -   [Informations](#informations)
 
 ## Description
@@ -31,7 +31,7 @@ To add this package to your project, use the `go get` command:
 go get github.com/cramanan/go-types
 ```
 
-## Types & Functions
+## Packages
 
 Most packages imports 2 function that returns their respective types: `New()` and `From()`
 
@@ -80,6 +80,10 @@ baz = baz.Append('f','o', 'o') // bar is now Slice[byte]("foobaz")
 //functions
 slices.Map(bar, func(i int) int { return i *2 }) // return Slice[int]{2,4,6}
 ```
+
+### Functions
+
+The functions package provides some [callback functions](/functions/functions.go) for Funcs arguments. It also provides [types](/functions/types.go) from these functions to define arguments, types, methods...
 
 ### Informations
 
