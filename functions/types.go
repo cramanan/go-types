@@ -1,17 +1,12 @@
 package functions
 
-import "golang.org/x/exp/constraints"
-
 // ComparisonFunc is a function type that takes two values of type T and returns an
-
+//
 // integer indicating their relative order. The return value is:
 //   - positive if the first value is greater than the second
 //   - negative if the first value is less than the second
 //   - zero if the values are equal
 type ComparisonFunc[T any] func(T, T) int
-
-// The OrderedFunc restores the Ordered operators for functions ending in Funcs
-type OrderedFunc[T constraints.Ordered] func(T, T) bool
 
 // CallbackFunc is a function type that takes a value of type T and an integer index
 // as arguments. It is often used as a callback function to process each element in
@@ -22,4 +17,4 @@ type CallbackFunc[T any] func(T, int)
 // SatisfyFunc returns a predicate function for a given value of type T.
 type SatisfyFunc[T comparable] func(T) func(T) bool
 
-type MappingFunc[O, I any] func(I, int) O
+type CallbackFuncReturns[O, I any] func(I, int) O
