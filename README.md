@@ -53,17 +53,10 @@ Methods expecting custom rules/functions often have a name ending in "Func". e.g
 
 ## Import
 
-To add this package to your project. You must select the version that matches your project version:
-
-| Golang versions | Go-Types Version |
-| --------------- | ---------------- |
-| 1.19 / 1.20     | v1.x.x           |
-| 1.21            | v2.x.x           |
-
-Once you find your version, use the `go get` command:
+To add this package to your project, use the `go get` command:
 
 ```
-go get github.com/cramanan/go-types@<version>
+go get github.com/cramanan/go-types
 ```
 
 ## Types
