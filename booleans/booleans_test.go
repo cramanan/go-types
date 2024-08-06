@@ -6,11 +6,14 @@ import (
 	. "github.com/cramanan/go-types/booleans"
 )
 
-func TestStaticLogical(t *testing.T) {
+func TestBooleans(t *testing.T) {
 	testCases := []struct {
 		desc      string
 		got, want Boolean
 	}{
+		{"Calibrating", True, true},
+		{"Calibrating", False, false},
+
 		{"AND", AND(True, True), True},
 		{"AND", AND(False, True), False},
 		{"AND", AND(False, False), False},
@@ -33,7 +36,48 @@ func TestStaticLogical(t *testing.T) {
 		{"NOR", NOR(False, True), False},
 		{"NOR", NOR(False, False), True},
 		{"NOR", NOR(True, False), False},
+
+		{"XOR", XOR(False, False), False},
+		{"XOR", XOR(True, False), True},
+		{"XOR", XOR(False, True), True},
+		{"XOR", XOR(True, True), False},
+
+		{"AND", True.AND(True), True},
+		{"AND", False.AND(True), False},
+		{"AND", False.AND(False), False},
+		{"AND", True.AND(False), False},
+
+		{"OR", True.OR(True), True},
+		{"OR", False.OR(True), True},
+		{"OR", False.OR(False), False},
+		{"OR", True.OR(False), True},
+
+		{"NOT", True.NOT(), False},
+		{"NOT", False.NOT(), True},
+
+		{"NAND", True.NAND(True), False},
+		{"NAND", False.NAND(True), True},
+		{"NAND", False.NAND(False), True},
+		{"NAND", True.NAND(False), True},
+
+		{"NOR", True.NOR(True), False},
+		{"NOR", False.NOR(True), False},
+		{"NOR", False.NOR(False), True},
+		{"NOR", True.NOR(False), False},
+
+		{"XOR", False.XOR(False), False},
+		{"XOR", True.XOR(False), True},
+		{"XOR", False.XOR(True), True},
+		{"XOR", True.XOR(True), False},
+
+		{"Truthy", Boolean(IsTruthy(True)), True},
+		{"Falsy", Boolean(IsTruthy(False)), False},
+		{"Falsy", Boolean(IsTruthy(0)), False},
+		{"Falsy", Boolean(IsTruthy("")), false},
+		{"Truthy", Boolean(IsTruthy("\x00")), True},
+		{"Truthy", Boolean(IsTruthy[*int](nil)), false},
 	}
+
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 			if tC.got != tC.want {
