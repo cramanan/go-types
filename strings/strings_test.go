@@ -470,7 +470,7 @@ func TestSplitAfter(t *testing.T) {
 			t.Errorf(`Split(%q, %q, %d) = %v; want %v`, tt.s, tt.sep, tt.n, a, tt.a)
 			continue
 		}
-		s := Join(a, "")
+		s := Join(a, New())
 		if s != tt.s {
 			t.Errorf(`Join(Split(%q, %q, %d), %q) = %q`, tt.s, tt.sep, tt.n, tt.sep, s)
 		}

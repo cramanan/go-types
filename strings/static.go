@@ -5,6 +5,14 @@ import (
 	"unicode"
 )
 
+type IString interface {
+	~string | ~[]byte | ~[]rune
+}
+
+type IChar interface {
+	~byte | ~rune
+}
+
 // Returns the length of strings.String
 func Len(s String) int { return len(s) }
 
@@ -56,8 +64,8 @@ func Concatenate(s String, strs ...string) String {
 // profiling indicates that it is needed.
 // For strings of length zero the string "" will be returned
 // and no allocation is made.
-func Clone(s String) String {
-	return String(strings.Clone(string(s)))
+func Clone[S IString](s S) S {
+	return S(strings.Clone(string(s)))
 }
 
 // Compare returns an integer comparing two strings lexicographically.
@@ -66,28 +74,23 @@ func Clone(s String) String {
 // Compare is included only for symmetry with package bytes.
 // It is usually clearer and always faster to use the built-in
 // string comparison operators ==, <, >, and so on.
-func Compare(str1 String, str2 String) int {
+func Compare[S1, S2 IString](str1 S1, str2 S2) int {
 	return strings.Compare(string(str1), string(str2))
 }
 
 // Contains reports whether substr is within s.
-func Contains(s String, substr String) bool {
+func Contains[S1, S2 IString | IChar](s S1, substr S2) bool {
 	return strings.Contains(string(s), string(substr))
 }
 
 // ContainsAny reports whether any Unicode code points in chars are within s.
-func ContainsAny(s String, chars String) bool {
+func ContainsAny[S IString | IChar](s S, chars S) bool {
 	return strings.ContainsAny(string(s), string(chars))
-}
-
-// ContainsRune reports whether the Unicode code point r is within s.
-func ContainsRune(s String, r rune) bool {
-	return strings.ContainsRune(string(s), r)
 }
 
 // Count counts the number of non-overlapping instances of substr in s.
 // If substr is an empty string, Count returns 1 + the number of Unicode code points in s.
-func Count(s String, substr String) int {
+func Count[S IString | IChar](s S, substr S) int {
 	return strings.Count(string(s), string(substr))
 }
 
@@ -95,47 +98,57 @@ func Count(s String, substr String) int {
 // returning the text before and after sep.
 // The found result reports whether sep appears in s.
 // If sep does not appear in s, cut returns s, "", false
-func Cut(s String, sep String) (before String, after String, found bool) {
+func Cut[S IString](s S, sep S) (before S, after S, found bool) {
 	bf, af, found := strings.Cut(string(s), string(sep))
-	return String(bf), String(af), found
+	return S(bf), S(af), found
+}
+
+// HasPrefix reports whether the string s begins with prefix.
+func HasPrefix[S IString | IChar](s S, prefix S) bool {
+	return strings.HasPrefix(string(s), string(prefix))
+}
+
+// HasSuffix reports whether the string s ends with suffix.
+func HasSuffix[S IString | IChar](s S, prefix S) bool {
+	return strings.HasSuffix(string(s), string(prefix))
 }
 
 // CutPrefix returns s without the provided leading prefix string
 // and reports whether it found the prefix.
 // If s doesn't start with prefix, CutPrefix returns s, false.
 // If prefix is the empty string, CutPrefix returns s, true.
-func CutPrefix(s, prefix String) (after String, found bool) {
+func CutPrefix[S IString](s, prefix S) (after String, found bool) {
 	if !HasPrefix(s, prefix) {
-		return s, false
+		return String(s), false
 	}
-	return s[len(prefix):], true
+	return String(s)[len(prefix):], true
 }
 
 // CutSuffix returns s without the provided ending suffix string
 // and reports whether it found the suffix.
 // If s doesn't end with suffix, CutSuffix returns s, false.
 // If suffix is the empty string, CutSuffix returns s, true.
-func CutSuffix(s, suffix String) (before String, found bool) {
+func CutSuffix[S IString](s, suffix S) (before String, found bool) {
 	if !HasSuffix(s, suffix) {
-		return s, false
+		return String(s), false
 	}
-	return s[:len(s)-len(suffix)], true
+	return String(s)[:len(s)-len(suffix)], true
 }
 
 // EqualFold reports whether s and t, interpreted as UTF-8 strings,
 // are equal under simple Unicode case-folding, which is a more general
 // form of case-insensitivity.
-func EqualFold(s String, t String) bool {
+func EqualFold[S IString | IChar](s S, t S) bool {
 	return strings.EqualFold(string(s), string(t))
 }
 
 // Fields splits the string s around each instance of one or more consecutive white space
 // characters, as defined by unicode.IsSpace, returning a slice of substrings of s or an
 // empty slice if s contains only white space.
-func Fields(s String) (fields []String) {
+func Fields[S IString](s S) (fields []S) {
 	native := strings.Fields(string(s))
 	for _, value := range native {
-		fields = append(fields, String(value))
+		fields = append(fields, S(value))
 	}
 	return fields
 }
@@ -146,101 +159,77 @@ func Fields(s String) (fields []String) {
 //
 // FieldsFunc makes no guarantees about the order in which it calls f(c)
 // and assumes that f always returns the same value for a given c.
-func FieldsFunc(s String, f func(rune) bool) (fields []String) {
-	native := strings.FieldsFunc(string(s), f)
-	fields = make([]String, len(native))
-	for i, value := range native {
-		fields[i] = String(value)
+func FieldsFunc[S IString, C IChar](s S, f func(C) bool) (fields []S) {
+	fn := func(c rune) bool { return f(C(c)) }
+
+	for _, value := range strings.FieldsFunc(string(s), fn) {
+		fields = append(fields, S(value))
 	}
+
 	return fields
 }
 
-// HasPrefix reports whether the string s begins with prefix.
-func HasPrefix(s String, prefix String) bool {
-	return strings.HasPrefix(string(s), string(prefix))
-}
-
-// HasSuffix reports whether the string s ends with suffix.
-func HasSuffix(s String, prefix String) bool {
-	return strings.HasSuffix(string(s), string(prefix))
-}
-
 // Index returns the index of the first instance of substr in s, or -1 if substr is not present in s.
-func Index(s String, substr String) int {
+func Index[S1, S2 IString | IChar](s S1, substr S2) int {
 	return strings.Index(string(s), string(substr))
 }
 
 // IndexAny returns the index of the first instance of any Unicode code point
 // from chars in s, or -1 if no Unicode code point from chars is present in s.
-func IndexAny(s String, substr String) int {
+func IndexAny[S1, S2 IString | IChar](s S1, substr S2) int {
 	return strings.IndexAny(string(s), string(substr))
-}
-
-// IndexByte returns the index of the first instance of c in s, or -1 if c is not present in s.
-func IndexByte(s String, c byte) int {
-	return strings.IndexByte(string(s), c)
 }
 
 // IndexFunc returns the index into s of the first Unicode
 // code point satisfying f(c), or -1 if none do.
-func IndexFunc(s String, f func(rune) bool) int {
-	return strings.IndexFunc(string(s), f)
-}
-
-// IndexRune returns the index of the first instance of the Unicode code point
-// r, or -1 if rune is not present in s.
-// If r is utf8.RuneError, it returns the first instance of any
-// invalid UTF-8 byte sequence.
-func IndexRune(s String, substr rune) int {
-	return strings.IndexRune(string(s), substr)
+func IndexFunc[S IString, C IChar](s S, f func(C) bool) int {
+	fn := func(c rune) bool { return f(C(c)) }
+	return strings.IndexFunc(string(s), fn)
 }
 
 // Join concatenates the elements of its first argument to create a single string. The separator
 // string sep is placed between elements in the resulting string.
-func Join(elems []String, sep String) String {
+func Join[S1 IString | IChar, S2 IString](elems []S1, sep S2) S2 {
 	strElems := make([]string, len(elems))
 	for i, elem := range elems {
 		strElems[i] = string(elem)
 	}
-	return String(strings.Join(strElems, string(sep)))
+	return S2(strings.Join(strElems, string(sep)))
 }
 
 // LastIndex returns the index of the last instance of substr in s, or -1 if substr is not present in s.
-func LastIndex(s String, substr String) int {
+func LastIndex[S1, S2 IString | IChar](s S1, substr S2) int {
 	return strings.LastIndex(string(s), string(substr))
+}
+
+// LastIndex returns the index of the last instance of substr in s, or -1 if substr is not present in s.
+func LastIndexFunc[S IString, C IChar](s S, f func(C) bool) int {
+	fn := func(c rune) bool { return f(C(c)) }
+	return strings.LastIndexFunc(string(s), fn)
 }
 
 // LastIndexAny returns the index of the last instance of any Unicode code
 // point from chars in s, or -1 if no Unicode code point from chars is
 // present in s.
-func LastIndexAny(s String, chars String) int {
+func LastIndexAny[S IString | IChar](s S, chars S) int {
 	return strings.LastIndexAny(string(s), string(chars))
-}
-
-// LastIndexByte returns the index of the last instance of c in s, or -1 if c is not present in s.
-func LastIndexByte(s String, c byte) int {
-	return strings.LastIndexByte(string(s), c)
-}
-
-// LastIndexFunc returns the index into s of the last
-// Unicode code point satisfying f(c), or -1 if none do.
-func LastIndexFunc(s String, f func(rune) bool) int {
-	return strings.LastIndexFunc(string(s), f)
 }
 
 // Map returns a copy of the string s with all its characters modified
 // according to the mapping function. If mapping returns a negative value, the character is
 // dropped from the string with no replacement.
-func Map(mapping func(rune) rune, s String) String {
-	return String(strings.Map(mapping, string(s)))
+func Map[C IChar, S IString](f func(C) C, s S) S {
+	fn := func(c rune) rune { return rune(f(C(c))) }
+
+	return S(strings.Map(fn, string(s)))
 }
 
 // Repeat returns a new string consisting of count copies of the string s.
 //
 // It panics if count is negative or if the result of (len(s) * count)
 // overflows.
-func Repeat(s String, count int) String {
-	return String(strings.Repeat(string(s), count))
+func Repeat[S IString](s S, count int) S {
+	return S(strings.Repeat(string(s), count))
 }
 
 // Replace returns a copy of the string s with the first n
@@ -249,8 +238,8 @@ func Repeat(s String, count int) String {
 // and after each UTF-8 sequence, yielding up to k+1 replacements
 // for a k-rune string.
 // If n < 0, there is no limit on the number of replacements.
-func Replace(s String, old String, new String, n int) String {
-	return String(strings.Replace(string(s), string(old), string(new), n))
+func Replace[S1 IString, S2 IString | IChar](s S1, old S2, new S2, n int) S1 {
+	return S1(strings.Replace(string(s), string(old), string(new), n))
 }
 
 // ReplaceAll returns a copy of the string s with all
@@ -258,8 +247,8 @@ func Replace(s String, old String, new String, n int) String {
 // If old is empty, it matches at the beginning of the string
 // and after each UTF-8 sequence, yielding up to k+1 replacements
 // for a k-rune string.
-func ReplaceAll(s, old, new String) String {
-	return String(strings.ReplaceAll(string(s), string(old), string(new)))
+func ReplaceAll[S1 IString, S2 IString | IChar](s S1, old, new S2) S1 {
+	return S1(strings.ReplaceAll(string(s), string(old), string(new)))
 }
 
 // Split slices s into all substrings separated by sep and returns a slice of
@@ -274,11 +263,11 @@ func ReplaceAll(s, old, new String) String {
 // It is equivalent to [SplitN] with a count of -1.
 //
 // To split around the first instance of a separator, see Cut.
-func Split(s String, sep String) []String {
+func Split[S1 IString, S2 IString | IChar](s S1, sep S2) []S1 {
 	native := strings.Split(string(s), string(sep))
-	strs := make([]String, len(native))
+	strs := make([]S1, len(native))
 	for i, value := range native {
-		strs[i] = String(value)
+		strs[i] = S1(value)
 	}
 	return strs
 }
@@ -293,11 +282,11 @@ func Split(s String, sep String) []String {
 // both s and sep are empty, SplitAfter returns an empty slice.
 //
 // It is equivalent to [SplitAfterN] with a count of -1.
-func SplitAfter(s String, sep String) []String {
+func SplitAfter[S1 IString, S2 IString | IChar](s S1, sep S2) []S1 {
 	native := strings.SplitAfter(string(s), string(sep))
-	strs := make([]String, len(native))
+	strs := make([]S1, len(native))
 	for i, value := range native {
-		strs[i] = String(value)
+		strs[i] = S1(value)
 	}
 	return strs
 }
@@ -313,11 +302,11 @@ func SplitAfter(s String, sep String) []String {
 //
 // Edge cases for s and sep (for example, empty strings) are handled
 // as described in the documentation for SplitAfter.
-func SplitAfterN(s String, sep String, n int) []String {
+func SplitAfterN[S1 IString, S2 IString | IChar](s S1, sep S2, n int) []S1 {
 	native := strings.SplitAfterN(string(s), string(sep), n)
-	strs := make([]String, len(native))
+	strs := make([]S1, len(native))
 	for i, value := range native {
-		strs[i] = String(value)
+		strs[i] = S1(value)
 	}
 	return strs
 }
@@ -335,109 +324,112 @@ func SplitAfterN(s String, sep String, n int) []String {
 // as described in the documentation for [Split].
 //
 // To split around the first instance of a separator, see Cut.
-func SplitN(s String, sep String, n int) []String {
+func SplitN[S1 IString, S2 IString | IChar](s S1, sep S2, n int) []S1 {
 	native := strings.SplitN(string(s), string(sep), n)
-	strs := make([]String, len(native))
+	strs := make([]S1, len(native))
 	for i, value := range native {
-		strs[i] = String(value)
+		strs[i] = S1(value)
 	}
 	return strs
 }
 
 // ToLower returns s with all Unicode letters mapped to their lower case.
-func ToLower(s String) String {
-	return String(strings.ToLower(string(s)))
+func ToLower[S IString](s S) S {
+	return S(strings.ToLower(string(s)))
 }
 
 // ToLowerSpecial returns a copy of the string s with all Unicode letters mapped to their
 // lower case using the case mapping specified by c.
-func ToLowerSpecial(c unicode.SpecialCase, s String) String {
-	return String(strings.ToLowerSpecial(c, string(s)))
+func ToLowerSpecial[S IString](c unicode.SpecialCase, s S) S {
+	return S(strings.ToLowerSpecial(c, string(s)))
 }
 
 // ToTitle returns a copy of the string s with all Unicode letters mapped to
 // their Unicode title case.
-func ToTitle(s String) String {
-	return String(strings.ToTitle(string(s)))
+func ToTitle[S IString](s S) S {
+	return S(strings.ToTitle(string(s)))
 }
 
 // ToTitleSpecial returns a copy of the string s with all Unicode letters mapped to their
 // Unicode title case, giving priority to the special casing rules.
-func ToTitleSpecial(c unicode.SpecialCase, s String) String {
-	return String(strings.ToTitleSpecial(c, string(s)))
+func ToTitleSpecial[S IString](c unicode.SpecialCase, s S) S {
+	return S(strings.ToTitleSpecial(c, string(s)))
 }
 
 // ToUpper returns s with all Unicode letters mapped to their upper case.
-func ToUpper(s String) String {
-	return String(strings.ToUpper(string(s)))
+func ToUpper[S IString](s S) S {
+	return S(strings.ToUpper(string(s)))
 }
 
 // ToUpperSpecial returns a copy of the string s with all Unicode letters mapped to their
 // upper case using the case mapping specified by c.
-func ToUpperSpecial(c unicode.SpecialCase, s String) String {
-	return String(strings.ToUpperSpecial(c, string(s)))
+func ToUpperSpecial[S IString](c unicode.SpecialCase, s S) S {
+	return S(strings.ToUpperSpecial(c, string(s)))
 }
 
 // ToValidUTF8 returns a copy of the string s with each run of invalid UTF-8 byte sequences
 // replaced by the replacement string, which may be empty.
-func ToValidUTF8(s String, replacement String) String {
-	return String(strings.ToValidUTF8(string(s), string(replacement)))
+func ToValidUTF8[S1 IString, S2 IString | IChar](s S1, replacement S2) S1 {
+	return S1(strings.ToValidUTF8(string(s), string(replacement)))
 }
 
 // Trim returns a slice of the string s with all leading and
 // trailing Unicode code points contained in cutset removed.
-func Trim(s String, cutset String) String {
-	return String(strings.Trim(string(s), string(cutset)))
+func Trim[S1 IString, S2 IString | IChar](s S1, cutset S2) S1 {
+	return S1(strings.Trim(string(s), string(cutset)))
 }
 
 // TrimFunc returns a slice of the string s with all leading
 // and trailing Unicode code points c satisfying f(c) removed.
-func TrimFunc(s String, f func(rune) bool) String {
-	return String(strings.TrimFunc(string(s), f))
+func TrimFunc[S IString, C IChar](s S, f func(C) bool) S {
+	fn := func(c rune) bool { return f(C(c)) }
+	return S(strings.TrimFunc(string(s), fn))
 }
 
 // TrimLeft returns a slice of the string s with all leading
 // Unicode code points contained in cutset removed.
 //
 // To remove a prefix, use [TrimPrefix] instead.
-func TrimLeft(s String, cutset String) String {
-	return String(strings.TrimLeft(string(s), string(cutset)))
+func TrimLeft[S IString, C IString | IChar](s S, cutset C) S {
+	return S(strings.TrimLeft(string(s), string(cutset)))
 }
 
 // TrimLeftFunc returns a slice of the string s with all leading
 // Unicode code points c satisfying f(c) removed.
-func TrimLeftFunc(s String, f func(rune) bool) String {
-	return String(strings.TrimLeftFunc(string(s), f))
+func TrimLeftFunc[S IString, C IChar](s S, f func(C) bool) S {
+	fn := func(c rune) bool { return f(C(c)) }
+	return S(strings.TrimLeftFunc(string(s), fn))
 }
 
 // TrimPrefix returns s without the provided leading prefix string.
 // If s doesn't start with prefix, s is returned unchanged.
-func TrimPrefix(s String, prefix String) String {
-	return String(strings.TrimPrefix(string(s), string(prefix)))
+func TrimPrefix[S IString, C IString | IChar](s S, prefix C) S {
+	return S(strings.TrimPrefix(string(s), string(prefix)))
 }
 
 // TrimRight returns a slice of the string s, with all trailing
 // Unicode code points contained in cutset removed.
 //
 // To remove a suffix, use [TrimSuffix] instead.
-func TrimRight(s String, cutset String) String {
-	return String(strings.TrimRight(string(s), string(cutset)))
+func TrimRight[S1 IString, S2 IString | IChar](s S1, cutset S2) S1 {
+	return S1(strings.TrimRight(string(s), string(cutset)))
 }
 
 // TrimRightFunc returns a slice of the string s with all trailing
 // Unicode code points c satisfying f(c) removed.
-func TrimRightFunc(s String, f func(rune) bool) String {
-	return String(strings.TrimRightFunc(string(s), f))
+func TrimRightFunc[S IString, C IChar](s S, f func(C) bool) String {
+	fn := func(c rune) bool { return f(C(c)) }
+	return String(strings.TrimRightFunc(string(s), fn))
 }
 
 // TrimSpace returns a slice of the string s, with all leading
 // and trailing white space removed, as defined by Unicode.
-func TrimSpace(s String) String {
-	return String(strings.TrimSpace(string(s)))
+func TrimSpace[S IString](s S) S {
+	return S(strings.TrimSpace(string(s)))
 }
 
 // TrimSuffix returns s without the provided trailing suffix string.
 // If s doesn't end with suffix, s is returned unchanged.
-func TrimSuffix(s String, suffix String) String {
-	return String(strings.TrimSuffix(string(s), string(suffix)))
+func TrimSuffix[S IString, C IString | IChar](s S, suffix C) S {
+	return S(strings.TrimSuffix(string(s), string(suffix)))
 }

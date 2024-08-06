@@ -91,7 +91,7 @@ func (s String) ContainsAny(chars String) bool {
 
 // ContainsRune reports whether the Unicode code point r is within s.
 func (s String) ContainsRune(r rune) bool {
-	return ContainsRune((s), r)
+	return Contains(s, r)
 }
 
 // Count counts the number of non-overlapping instances of substr in s.
@@ -138,7 +138,7 @@ func (s String) EqualFold(t String) bool {
 // characters, as defined by unicode.IsSpace, returning a slice of substrings of s or an
 // empty slice if s contains only white space.
 func (s String) Fields() (fields []String) {
-	native := Fields((s))
+	native := Fields(s)
 	for _, value := range native {
 		fields = append(fields, String(value))
 	}
@@ -183,7 +183,7 @@ func (s String) IndexAny(substr String) int {
 
 // IndexByte returns the index of the first instance of c in s, or -1 if c is not present in s.
 func (s String) IndexByte(c byte) int {
-	return IndexByte((s), c)
+	return Index(s, c)
 }
 
 // IndexFunc returns the index into s of the first Unicode
@@ -197,7 +197,7 @@ func (s String) IndexFunc(f func(rune) bool) int {
 // If r is utf8.RuneError, it returns the first instance of any
 // invalid UTF-8 byte sequence.
 func (s String) IndexRune(substr rune) int {
-	return IndexRune((s), substr)
+	return Index(s, substr)
 }
 
 // LastIndex returns the index of the last instance of substr in s, or -1 if substr is not present in s.
@@ -214,7 +214,7 @@ func (s String) LastIndexAny(chars String) int {
 
 // LastIndexByte returns the index of the last instance of c in s, or -1 if c is not present in s.
 func (s String) LastIndexByte(c byte) int {
-	return LastIndexByte((s), c)
+	return LastIndex((s), c)
 }
 
 // LastIndexFunc returns the index into s of the last
