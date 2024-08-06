@@ -9,6 +9,8 @@ type Ordered[O constraints.Ordered] []O
 
 func New[T constraints.Ordered](values ...T) Ordered[T] { return values }
 
+func From[O ~[]T, T constraints.Ordered](slice O) Ordered[T] { return Ordered[T](slice) }
+
 // Concat returns a new slice concatenating the passed in slices.
 func (s Ordered[T]) Concat(sls ...Ordered[T]) Ordered[T] {
 	for _, v := range sls {

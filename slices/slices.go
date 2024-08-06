@@ -47,12 +47,12 @@ func Map[SI ~[]I, I, O any](s SI, callbackFn func(I, int) O) (mapped []O) {
 }
 
 func New[T any](values ...T) Slice[T] {
-	return append(*new(Slice[T]), values...)
+	return values
 }
 
-// func From[S ~[O], O any](s S) Slice[O] {
-// 	return s
-// }
+func From[S ~[]O, O any](s S) Slice[O] {
+	return Slice[O](s)
+}
 
 // Reduce applies a reduction function to each element of the input ~[From] and returns a single value of any To.
 //
