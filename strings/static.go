@@ -104,18 +104,22 @@ func Cut(s String, sep String) (before String, after String, found bool) {
 // and reports whether it found the prefix.
 // If s doesn't start with prefix, CutPrefix returns s, false.
 // If prefix is the empty string, CutPrefix returns s, true.
-func CutPrefix(s String, prefix String) (after String, found bool) {
-	af, found := strings.CutPrefix(string(s), string(prefix))
-	return String(af), found
+func CutPrefix(s, prefix String) (after String, found bool) {
+	if !HasPrefix(s, prefix) {
+		return s, false
+	}
+	return s[len(prefix):], true
 }
 
 // CutSuffix returns s without the provided ending suffix string
 // and reports whether it found the suffix.
 // If s doesn't end with suffix, CutSuffix returns s, false.
 // If suffix is the empty string, CutSuffix returns s, true.
-func CutSuffix(s String, prefix String) (after String, found bool) {
-	af, found := strings.CutSuffix(string(s), string(prefix))
-	return String(af), found
+func CutSuffix(s, suffix String) (before String, found bool) {
+	if !HasSuffix(s, suffix) {
+		return s, false
+	}
+	return s[:len(s)-len(suffix)], true
 }
 
 // EqualFold reports whether s and t, interpreted as UTF-8 strings,

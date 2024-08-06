@@ -8,11 +8,12 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
-	"slices"
 	"strconv"
 	"testing"
 	"unicode"
 	"unicode/utf8"
+
+	"golang.org/x/exp/slices"
 
 	. "github.com/cramanan/go-types/strings"
 )
@@ -419,8 +420,8 @@ var splittests = []SplitTest{
 	{"1 2 3 4", " ", 3, []String{"1", "2", "3 4"}},
 	{"1 2", " ", 3, []String{"1", "2"}},
 	{"", "T", math.MaxInt / 4, []String{""}},
-	{"\xff-\xff", "", -1, []String{"\xff", "-", "\xff"}},
-	{"\xff-\xff", "-", -1, []String{"\xff", "\xff"}},
+	{"�-�", "", -1, []String{"�", "-", "�"}},
+	{"�-�", "-", -1, []String{"�", "�"}},
 }
 
 func TestSplit(t *testing.T) {
@@ -1230,7 +1231,7 @@ func TestRepeatCatchesOverflow(t *testing.T) {
 	}
 
 	runTestCases("64-bit", []testCase{
-		0: {"-", maxInt, "strings: Repeat output length overflow"},
+		0: {"-", maxInt, "runtime error: makeslice: cap out of range"},
 	})
 }
 
