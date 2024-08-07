@@ -27,7 +27,10 @@
 //	}
 package strings
 
-import "unicode"
+import (
+	"strings"
+	"unicode"
+)
 
 // String is a type that wraps the built-in string type,
 // allowing for custom methods and behaviors to be defined.
@@ -38,6 +41,12 @@ type IString interface{ ~string | ~[]byte | ~[]rune }
 
 // IChar is an interface that can be satisfied by byte or rune.
 type IChar interface{ ~byte | ~rune }
+
+type (
+	Builder  = strings.Builder
+	Reader   = strings.Reader
+	Replacer = strings.Replacer
+)
 
 // New returns a new, empty String.
 func New() String { return "" }

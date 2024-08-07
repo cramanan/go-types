@@ -6,6 +6,8 @@ import (
 	"unicode"
 )
 
+func NewReader[S IString](s S) *Reader { return strings.NewReader(string(s)) }
+
 // Len returns the length of the string | []byte | []rune s.
 func Len[S IString](s S) int { return len(s) }
 
@@ -70,6 +72,13 @@ func Contains[S1, S2 IString | IChar](s S1, substr S2) bool {
 // ContainsAny reports whether any Unicode code points in chars are within s.
 func ContainsAny[S1, S2 IString | IChar](s S1, chars S2) bool {
 	return strings.ContainsAny(string(s), string(chars))
+}
+
+func ContainsFunc[S IString](s S, callbackFn func(rune) bool) bool {
+	if callbackFn == nil {
+		panic("callback function is nil")
+	}
+	return strings.ContainsFunc(string(s), callbackFn)
 }
 
 // Count counts the number of non-overlapping instances of substr in s.
@@ -153,6 +162,9 @@ func FieldsFunc[S IString, C IChar](s S, f func(C) bool) (fields []S) {
 
 // Index returns the index of the first instance of substr in s, or -1 if substr is not present in s.
 func Index[S1, S2 IString | IChar](s S1, substr S2) int {
+	if len(string(substr)) == 1 {
+		return strings.IndexRune(string(s), rune(string(substr)[0]))
+	}
 	return strings.Index(string(s), string(substr))
 }
 
@@ -390,11 +402,11 @@ func TrimRight[S1 IString, S2 IString | IChar](s S1, cutset S2) S1 {
 
 // TrimRightFunc returns a slice of the string s with all trailing
 // Unicode code points c satisfying f(c) removed.
-func TrimRightFunc[S IString](s S, callbackFn func(rune) bool) String {
+func TrimRightFunc[S IString](s S, callbackFn func(rune) bool) S {
 	if callbackFn == nil {
 		panic("callback function is nil")
 	}
-	return String(strings.TrimRightFunc(string(s), callbackFn))
+	return S(strings.TrimRightFunc(string(s), callbackFn))
 }
 
 // TrimSpace returns a slice of the string s, with all leading
