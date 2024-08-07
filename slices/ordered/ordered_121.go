@@ -2,9 +2,7 @@
 
 package ordered
 
-import (
-	"slices"
-)
+import "slices"
 
 func (s Ordered[T]) Concat(sls ...Ordered[T]) Ordered[T] {
 	for _, v := range sls {

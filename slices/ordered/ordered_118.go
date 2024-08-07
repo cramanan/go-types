@@ -2,9 +2,7 @@
 
 package ordered
 
-import (
-	"golang.org/x/exp/slices"
-)
+import "golang.org/x/exp/slices"
 
 func (s Ordered[T]) Concat(sls ...Ordered[T]) Ordered[T] {
 	for _, v := range sls {
