@@ -6,10 +6,6 @@ import (
 	"slices"
 )
 
-func init() {
-	print("ordered 1.21^")
-}
-
 func (s Ordered[T]) Concat(sls ...Ordered[T]) Ordered[T] {
 	for _, v := range sls {
 		s = append(s, v...)

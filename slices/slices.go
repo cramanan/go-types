@@ -1,10 +1,6 @@
 // The slices package provides generic Slice wrapper for the built-in Go slice type and slices functions.
 package slices
 
-func init() {
-	print("any")
-}
-
 // Slice is a generic type that wraps a slice of any type T.
 // It provides a way to work with slices in a type-safe manner.
 //
