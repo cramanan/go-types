@@ -1,6 +1,6 @@
 package constants
 
-// Byte Size type
+// Byte size type
 type bsize = float64
 
 const (
