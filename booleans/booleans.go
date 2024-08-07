@@ -39,7 +39,12 @@ const (
 // New returns False as a Boolean.
 func New() Boolean { return *new(Boolean) }
 
-func IsTruthy[O comparable](b O) bool { return b != *new(O) }
+func IsTruthy[O interface {
+	comparable
+	any
+}](b O) bool {
+	return b != *new(O)
+}
 
 // Int convert b into an integer.
 func Int[B ~bool](b B) int {
@@ -50,18 +55,18 @@ func Int[B ~bool](b B) int {
 }
 
 // NOT returns the logical negation of b.
-func NOT[B ~bool](b B) B { return !b }
+func NOT[B ~bool](boolean B) B { return !boolean }
 
 // AND returns the logical conjunction of a and b.
-func AND[B ~bool](a, b B) B { return a && b }
+func AND[B1, B2 ~bool](boolean1 B1, boolean2 B2) B1 { return boolean1 && B1(boolean2) }
 
 // NAND returns the logical negation of the conjunction of a and b.
-func NAND[B ~bool](a, b B) B { return !(a && b) }
+func NAND[B1, B2 ~bool](boolean1 B1, boolean2 B2) B1 { return !AND(boolean1, boolean2) }
 
 // OR returns the logical disjunction of a and b.
-func OR[B ~bool](a, b B) B { return a || b }
+func OR[B1, B2 ~bool](boolean1 B1, boolean2 B2) B1 { return boolean1 || B1(boolean2) }
 
 // NOR returns the logical negation of the disjunction of a and b.
-func NOR[B ~bool](a, b B) B { return !(a || b) }
+func NOR[B1, B2 ~bool](boolean1 B1, boolean2 B2) B1 { return !OR(boolean1, boolean2) }
 
-func XOR[B ~bool](b1 B, b2 B) B { return b1 != b2 }
+func XOR[B1, B2 ~bool](boolean1 B1, boolean2 B2) B1 { return boolean1 != B1(boolean2) }

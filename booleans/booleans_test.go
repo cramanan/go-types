@@ -7,6 +7,9 @@ import (
 )
 
 func TestBooleans(t *testing.T) {
+
+	ptr := 1
+
 	testCases := []struct {
 		desc      string
 		got, want Boolean
@@ -75,7 +78,11 @@ func TestBooleans(t *testing.T) {
 		{"Falsy", Boolean(IsTruthy(0)), False},
 		{"Falsy", Boolean(IsTruthy("")), false},
 		{"Truthy", Boolean(IsTruthy("\x00")), True},
-		{"Truthy", Boolean(IsTruthy[*int](nil)), false},
+		{"Falsy", Boolean(IsTruthy[*int](nil)), false},
+		{"Truthy", Boolean(IsTruthy(&ptr)), true},
+
+		{"Truthy", Boolean(IsTruthy(struct{}{})), false},
+		{"Truthy", Boolean(IsTruthy(struct{ test string }{"1"})), true},
 	}
 
 	for _, tC := range testCases {
