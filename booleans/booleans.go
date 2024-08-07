@@ -39,20 +39,8 @@ const (
 // New returns False as a Boolean.
 func New() Boolean { return *new(Boolean) }
 
-func IsTruthy[O interface {
-	comparable
-	any
-}](b O) bool {
-	return b != *new(O)
-}
-
-// Int convert b into an integer.
-func Int[B ~bool](b B) int {
-	if b {
-		return 1
-	}
-	return 0
-}
+// IsTruthy performs a Non Zero operation of infered type T
+func IsTruthy[T comparable](b T) bool { return b != *new(T) }
 
 // NOT returns the logical negation of b.
 func NOT[B ~bool](boolean B) B { return !boolean }

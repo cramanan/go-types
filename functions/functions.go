@@ -50,8 +50,7 @@ func Less[T constraints.Ordered](x T, y T) bool { return compare(x, y) == -1 }
 func LessOrEqual[T constraints.Ordered](x T, y T) bool { return compare(x, y) <= 0 }
 
 // Satisfy returns a function that checks if a value is equal to the target value.
-// The returned function can be used with functions like strings.IndexFunc to find
-// the index of the target value in a slice.
+// The returned function can be used with functions like strings.FieldsFunc.
 func Satisfy[T comparable](target T) func(T) bool { return func(x T) bool { return x == target } }
 
 // Ascending compares two values of type T and returns an integer indicating their order.

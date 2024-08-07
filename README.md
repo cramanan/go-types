@@ -19,7 +19,7 @@ A collection of "upgraded" Golang types.
 
 ## Description
 
-Influenced by JavaScript, Python and Rust, the Go-Types package offers Object-Oriented wrappers of [Golang types](https://go.dev/ref/spec#Types) with built-in methods that native types doesn't implement.
+Influenced by JavaScript and Python, the Go-Types package offers Object-Oriented wrappers of [Golang types](https://go.dev/ref/spec#Types) with built-in methods that native types doesn't implement.
 
 They also convert standard library functions into generics methods.
 

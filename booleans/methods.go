@@ -1,8 +1,5 @@
 package booleans
 
-// ToInt convert b into an integer.
-func (b Boolean) Int() int { return Int(b) }
-
 // AND returns the logical conjunction of a and b.
 func (b Boolean) AND(b2 Boolean) Boolean { return AND(b, b2) }
 

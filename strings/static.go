@@ -1,6 +1,7 @@
 package strings
 
 import (
+	"fmt"
 	"strings"
 	"unicode"
 )
@@ -8,17 +9,23 @@ import (
 // Len returns the length of the string | []byte | []rune s.
 func Len[S IString](s S) int { return len(s) }
 
-func At[C IChar, S IString](s S, n int) C {
+func At[C IChar | ~string, S IString](s S, n int) C {
+	idx := n
 	if n < 0 {
 		n = len(s) + n
 	}
+
+	if n < 0 || n > len(s)-1 {
+		panic(fmt.Sprintf("index out of range: strings.At(%d) for %T of length %d", idx, s, len(s)))
+	}
+
 	return C(string(s)[n])
 }
 
 // Concatenate concatenates a variable number of strings into a single string.
 // The type of the resulting string is determined by the type parameter T.
-func Concatenate[T IString, S IString](strs ...S) T {
-	toString := *new([]string)
+func Concatenate[T IString](first T, strs ...T) T {
+	toString := append([]string{}, string(first))
 	for _, s := range strs {
 		toString = append(toString, string(s))
 	}
@@ -61,13 +68,13 @@ func Contains[S1, S2 IString | IChar](s S1, substr S2) bool {
 }
 
 // ContainsAny reports whether any Unicode code points in chars are within s.
-func ContainsAny[S IString | IChar](s S, chars S) bool {
+func ContainsAny[S1, S2 IString | IChar](s S1, chars S2) bool {
 	return strings.ContainsAny(string(s), string(chars))
 }
 
 // Count counts the number of non-overlapping instances of substr in s.
 // If substr is an empty string, Count returns 1 + the number of Unicode code points in s.
-func Count[S IString | IChar](s S, substr S) int {
+func Count[S1, S2 IString | IChar](s S1, substr S2) int {
 	return strings.Count(string(s), string(substr))
 }
 
@@ -75,47 +82,47 @@ func Count[S IString | IChar](s S, substr S) int {
 // returning the text before and after sep.
 // The found result reports whether sep appears in s.
 // If sep does not appear in s, cut returns s, "", false
-func Cut[S IString](s S, sep S) (before S, after S, found bool) {
+func Cut[S1 IString, S2 IString | IChar](s S1, sep S2) (before S1, after S1, found bool) {
 	bf, af, found := strings.Cut(string(s), string(sep))
-	return S(bf), S(af), found
+	return S1(bf), S1(af), found
 }
 
 // HasPrefix reports whether the string s begins with prefix.
-func HasPrefix[S IString | IChar](s S, prefix S) bool {
+func HasPrefix[S1, S2 IString | IChar](s S1, prefix S2) bool {
 	return strings.HasPrefix(string(s), string(prefix))
 }
 
 // HasSuffix reports whether the string s ends with suffix.
-func HasSuffix[S IString | IChar](s S, prefix S) bool {
-	return strings.HasSuffix(string(s), string(prefix))
+func HasSuffix[S1, S2 IString | IChar](s S1, suffix S2) bool {
+	return strings.HasSuffix(string(s), string(suffix))
 }
 
 // CutPrefix returns s without the provided leading prefix string
 // and reports whether it found the prefix.
 // If s doesn't start with prefix, CutPrefix returns s, false.
 // If prefix is the empty string, CutPrefix returns s, true.
-func CutPrefix[S IString](s, prefix S) (after String, found bool) {
+func CutPrefix[S1 IString, S2 IString | IChar](s S1, prefix S2) (after S1, found bool) {
 	if !HasPrefix(s, prefix) {
-		return String(s), false
+		return (s), false
 	}
-	return String(s)[len(prefix):], true
+	return S1(string(s)[len(string(prefix)):]), true
 }
 
 // CutSuffix returns s without the provided ending suffix string
 // and reports whether it found the suffix.
 // If s doesn't end with suffix, CutSuffix returns s, false.
 // If suffix is the empty string, CutSuffix returns s, true.
-func CutSuffix[S IString](s, suffix S) (before String, found bool) {
+func CutSuffix[S1 IString, S2 IString | IChar](s S1, suffix S2) (after S1, found bool) {
 	if !HasSuffix(s, suffix) {
-		return String(s), false
+		return s, false
 	}
-	return String(s)[:len(s)-len(suffix)], true
+	return S1(string(s)[:len(s)-len(string(suffix))]), true
 }
 
 // EqualFold reports whether s and t, interpreted as UTF-8 strings,
 // are equal under simple Unicode case-folding, which is a more general
 // form of case-insensitivity.
-func EqualFold[S IString | IChar](s S, t S) bool {
+func EqualFold[S1, S2 IString | IChar](s S1, t S2) bool {
 	return strings.EqualFold(string(s), string(t))
 }
 
@@ -138,11 +145,9 @@ func Fields[S IString](s S) (fields []S) {
 // and assumes that f always returns the same value for a given c.
 func FieldsFunc[S IString, C IChar](s S, f func(C) bool) (fields []S) {
 	fn := func(c rune) bool { return f(C(c)) }
-
 	for _, value := range strings.FieldsFunc(string(s), fn) {
 		fields = append(fields, S(value))
 	}
-
 	return fields
 }
 
@@ -188,7 +193,7 @@ func LastIndexFunc[S IString, C IChar](s S, f func(C) bool) int {
 // LastIndexAny returns the index of the last instance of any Unicode code
 // point from chars in s, or -1 if no Unicode code point from chars is
 // present in s.
-func LastIndexAny[S IString | IChar](s S, chars S) int {
+func LastIndexAny[S1, S2 IString | IChar](s S1, chars S2) int {
 	return strings.LastIndexAny(string(s), string(chars))
 }
 

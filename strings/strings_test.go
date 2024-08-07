@@ -8,12 +8,11 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"reflect"
 	"strconv"
 	"testing"
 	"unicode"
 	"unicode/utf8"
-
-	"golang.org/x/exp/slices"
 
 	. "github.com/cramanan/go-types/strings"
 )
@@ -440,7 +439,7 @@ func TestSplit(t *testing.T) {
 		}
 		if tt.n < 0 {
 			b := tt.s.Split(tt.sep)
-			if !slices.Equal(a, b) {
+			if !reflect.DeepEqual(a, b) {
 				t.Errorf("Split disagrees with SplitN(%q, %q, %d) = %v; want %v", tt.s, tt.sep, tt.n, b, a)
 			}
 		}
@@ -476,7 +475,7 @@ func TestSplitAfter(t *testing.T) {
 		}
 		if tt.n < 0 {
 			b := tt.s.SplitAfter(tt.sep)
-			if !slices.Equal(a, b) {
+			if !reflect.DeepEqual(a, b) {
 				t.Errorf("SplitAfter disagrees with SplitAfterN(%q, %q, %d) = %v; want %v", tt.s, tt.sep, tt.n, b, a)
 			}
 		}
