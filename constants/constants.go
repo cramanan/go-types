@@ -1,11 +1,8 @@
 package constants
 
-// Byte size type
-type bsize = float64
-
 const (
 	// B represents a single byte, the basic unit of digital information.
-	B bsize = 1 << (10 * iota)
+	B float64 = 1 << (10 * iota)
 
 	// KB represents a kilobyte, which is 1,024 bytes.
 	KB
@@ -25,11 +22,11 @@ const (
 	// EB represents an exabyte, which is 1,152,921,504,606,846,976 bytes or 1,024 petabytes.
 	EB
 
-	// YB represents a yottabyte, which is 1,208,925,819,614,629,174,706,176 bytes or 1,024 zettabytes.
-	YB
-
 	// ZB represents a zettabyte, which is 1,180,591,620,717,411,303,424 bytes or 1,024 exabytes.
 	ZB
+
+	// YB represents a yottabyte, which is 1,208,925,819,614,629,174,706,176 bytes or 1,024 zettabytes.
+	YB
 )
 
 // Characters
