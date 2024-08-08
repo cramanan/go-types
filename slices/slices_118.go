@@ -1,4 +1,4 @@
-//go:build go1.18 && !go1.21
+//go:build go1.19 && !go1.21
 
 // The slices package provides generic Slice wrapper for the built-in Go slice type and slices functions.
 package slices
