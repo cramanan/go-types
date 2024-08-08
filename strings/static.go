@@ -6,7 +6,22 @@ import (
 	"unicode"
 )
 
-func NewReader[S IString](s S) *Reader { return strings.NewReader(string(s)) }
+// NewReader returns a new [Reader] reading from s. It is similar to bytes.NewBufferString but more efficient and non-writable.
+func NewReader[S IString](s S) *strings.Reader { return strings.NewReader(string(s)) }
+
+// NewReplacer returns a new [Replacer] from a list of old, new string
+// pairs. Replacements are performed in the order they appear in the
+// target string, without overlapping matches. The old string
+// comparisons are done in argument order.
+//
+// NewReplacer panics if given an odd number of arguments.
+func NewReplacer[S IString](s ...S) *strings.Replacer {
+	strs := make([]string, len(s))
+	for i, v := range s {
+		strs[i] = string(v)
+	}
+	return strings.NewReplacer(strs...)
+}
 
 // Len returns the length of the string | []byte | []rune s.
 func Len[S IString](s S) int { return len(s) }
@@ -161,11 +176,20 @@ func FieldsFunc[S IString, C IChar](s S, f func(C) bool) (fields []S) {
 }
 
 // Index returns the index of the first instance of substr in s, or -1 if substr is not present in s.
-func Index[S1, S2 IString | IChar](s S1, substr S2) int {
-	if len(string(substr)) == 1 {
-		return strings.IndexRune(string(s), rune(string(substr)[0]))
+func Index[S1, S2 IString | IChar](str S1, substr S2) int {
+
+	// Use any(substr) to assert that substr implements the empty interface,
+	// which allows us to use a type switch to determine its underlying type.
+	switch sub := any(substr).(type) {
+	case rune:
+		return strings.IndexRune(string(str), sub)
+	case byte:
+		return strings.IndexByte(string(str), sub)
+	case string:
+		return strings.Index(string(str), sub)
+	default:
+		return -1
 	}
-	return strings.Index(string(s), string(substr))
 }
 
 // IndexAny returns the index of the first instance of any Unicode code point

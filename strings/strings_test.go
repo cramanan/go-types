@@ -297,8 +297,8 @@ func TestIndexRune(t *testing.T) {
 		{"a☺b☻c☹d\xe2\x98�\xff�\xed\xa0\x80", utf8.MaxRune + 1, -1},
 	}
 	for _, tt := range tests {
-		if got := Index(tt.in, tt.rune); got != tt.want {
-			t.Log(tt.in, tt.rune)
+		got := Index(tt.in, tt.rune)
+		if got != tt.want {
 			t.Errorf("Index[Rune](%q, %d) = %v; want %v", tt.in, tt.rune, got, tt.want)
 		}
 	}
