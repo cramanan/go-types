@@ -26,6 +26,7 @@ func NewReplacer[S IString](s ...S) *strings.Replacer {
 // Len returns the length of the string | []byte | []rune s.
 func Len[S IString](s S) int { return len(s) }
 
+// At returns the character at index n, the type parameter defines the return type
 func At[C IChar | ~string, S IString](s S, n int) C {
 	idx := n
 	if n < 0 {
@@ -93,7 +94,7 @@ func ContainsFunc[S IString](s S, callbackFn func(rune) bool) bool {
 	if callbackFn == nil {
 		panic("callback function is nil")
 	}
-	return strings.ContainsFunc(string(s), callbackFn)
+	return IndexFunc(string(s), callbackFn) >= 0
 }
 
 // Count counts the number of non-overlapping instances of substr in s.
@@ -247,9 +248,7 @@ func Map[S IString](callbackFn func(rune) rune, s S) S {
 //
 // It panics if count is negative or if the result of (len(s) * count)
 // overflows.
-func Repeat[S IString](s S, count int) S {
-	return S(strings.Repeat(string(s), count))
-}
+func Repeat[S IString](s S, count int) S { return S(strings.Repeat(string(s), count)) }
 
 // Replace returns a copy of the string s with the first n
 // non-overlapping instances of old replaced by new.
