@@ -39,7 +39,7 @@ const (
 // New returns False as a Boolean.
 func New() Boolean { return *new(Boolean) }
 
-// IsTruthy performs a Non Zero comparison of infered type T
+// IsTruthy performs a Non Zero comparison of inferred type T
 func IsTruthy[T comparable](b T) bool { return b != *new(T) }
 
 // NOT returns the logical negation of b.

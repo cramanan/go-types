@@ -1,6 +1,7 @@
 # Go-Types
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/cramanan/go-types.svg)](https://pkg.go.dev/github.com/cramanan/go-types)
+[![Go Report Card](https://goreportcard.com/badge/github.com/cramanan/go-types)](https://goreportcard.com/report/github.com/cramanan/go-types)
 
 A collection of advanced Golang types and generic wrappers.
 

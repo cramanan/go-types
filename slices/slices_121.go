@@ -12,7 +12,7 @@ import (
 // and returns a new slice with the results.
 func Map[SI ~[]I, I, T any](s SI, callbackFn func(I, int) T) (mapped []T) {
 	if callbackFn == nil {
-		panic("callback funtion is nil")
+		panic("callback function is nil")
 	}
 	for i, v := range s {
 		mapped = append(mapped, callbackFn(v, i))
@@ -29,7 +29,7 @@ func Reduce[I any, T any](
 ) (reduced T) {
 
 	if callbackFn == nil {
-		panic("callback funtion is nil")
+		panic("callback function is nil")
 	}
 	reduced = initialValue
 	for i, element := range s {

@@ -25,7 +25,7 @@ func TestNew(t *testing.T) {
 		{"Populated", New(1, 2, 3, 4, 5, 6), Ordered[int]{1, 2, 3, 4, 5, 6}},
 
 		{"Empty Spread", New([]int{}...), nil},
-		{"Spreaded", New([]int{1, 2, 3, 4, 5, 6}...), Ordered[int]{1, 2, 3, 4, 5, 6}},
+		{"Spread", New([]int{1, 2, 3, 4, 5, 6}...), Ordered[int]{1, 2, 3, 4, 5, 6}},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
