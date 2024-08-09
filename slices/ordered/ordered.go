@@ -20,4 +20,4 @@ func New[T constraints.Ordered](values ...T) Ordered[T] { return values }
 //
 // The From function takes a slice of type `slice` that is equivalent to `[]T`, where `T` implements the constraints.Ordered interface.
 // It returns a new Ordered slice containing the elements of the original slice.
-func From[T constraints.Ordered](s []T) Ordered[T] { return Ordered[T](s) }
+func From[S ~[]T, T constraints.Ordered](s S) Ordered[T] { return Ordered[T](s) }

@@ -178,9 +178,6 @@ func FieldsFunc[S IString, C IChar](s S, f func(C) bool) (fields []S) {
 
 // Index returns the index of the first instance of substr in s, or -1 if substr is not present in s.
 func Index[S1, S2 IString | IChar](str S1, substr S2) int {
-
-	// Use any(substr) to assert that substr implements the empty interface,
-	// which allows us to use a type switch to determine its underlying type.
 	switch sub := any(substr).(type) {
 	case rune:
 		return strings.IndexRune(string(str), sub)
