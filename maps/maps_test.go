@@ -238,3 +238,133 @@ func TestCloneLarge(t *testing.T) {
 		}
 	}
 }
+
+func TestForEach(t *testing.T) {
+	m := New[string, int]()
+	m["a"] = 1
+	m["b"] = 2
+	m["c"] = 3
+
+	called := 0
+	callbackFn := func(k string, v int) {
+		called++
+	}
+	m.ForEach(callbackFn)
+
+	if called != 3 {
+		t.Errorf("Foreach got %d, want %d", called, 3)
+	}
+}
+
+func TestFilter(t *testing.T) {
+	m := New[rune, int]()
+	m['a'] = 1
+	m['b'] = 2
+	m['c'] = 3
+	m['d'] = 4
+	m['e'] = 5
+	m['f'] = 6
+	m2 := m.Clone()
+
+	callbackFn := func(k rune, v int) bool { return v%2 == 0 }
+	got := m.Filter(callbackFn)
+	size := got.Size()
+
+	if size != 3 {
+		t.Errorf("Size() got %d, want %d", size, 6)
+	}
+
+	want := Map[rune, int]{'b': 2, 'd': 4, 'f': 6}
+
+	if !Equal(got, want) {
+		t.Errorf("Filter got %v, want %v", got, want)
+	}
+
+	if !Equal(m, m2) {
+		t.Errorf("Clone got %v, want %v", m2, m)
+	}
+
+}
+
+func TestSome(t *testing.T) {
+	m := New[byte, int]()
+	m['a'] = 1
+	m['b'] = 2
+	m['c'] = 3
+
+	callbackFn := func(k byte, v int) bool { return v%2 == 0 }
+
+	got := m.Some(callbackFn)
+	want := true
+	if got != want {
+		t.Errorf("Some(callbackFn) got %t, want %t", got, want)
+	}
+
+	callbackFn = func(k byte, v int) bool { return v > 3 }
+	got = m.Some(callbackFn)
+	want = false
+	if got != want {
+		t.Errorf("Some(callbackFn) got %t, want %t", got, want)
+	}
+}
+
+func TestEvery(t *testing.T) {
+	m := New[float32, int]()
+	m[0.0] = 2
+	m[1.1] = 4
+	m[2.2] = 6
+
+	callbackFn := func(k float32, v int) bool { return v%2 == 0 }
+	got := m.Every(callbackFn)
+	want := true
+	if got != want {
+		t.Errorf("Every(callbackFn) got %t, want %t", got, want)
+	}
+
+	callbackFn = func(k float32, v int) bool { return v > 3 }
+	got = m.Every(callbackFn)
+	want = false
+	if got != want {
+		t.Errorf("Every(callbackFn) got %t, want %t", got, want)
+	}
+}
+
+func TestSize(t *testing.T) {
+	m := New[string, int]()
+	got := m.Size()
+	if got != 0 {
+		t.Errorf("Size() got %d, want %d", got, 0)
+	}
+
+	m["a"] = 1
+	got = m.Size()
+	if got != 1 {
+		t.Errorf("Size() got %d, want %d", got, 1)
+	}
+
+	m["b"] = 2
+	got = m.Size()
+	if got != 2 {
+		t.Errorf("Size() got %d, want %d", got, 2)
+	}
+}
+
+func TestIsEmpty(t *testing.T) {
+	m := New[string, int]()
+	got := m.IsEmpty()
+	if got != true {
+		t.Errorf("IsEmpty() got %t, want %t", got, true)
+	}
+
+	m["a"] = 1
+	got = m.IsEmpty()
+	if got != false {
+		t.Errorf("IsEmpty() got %t, want %t", got, false)
+	}
+
+	m.Clear()
+	got = m.IsEmpty()
+	if got != true {
+		t.Errorf("IsEmpty() got %t, want %t", got, true)
+	}
+}

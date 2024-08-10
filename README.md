@@ -15,6 +15,7 @@ A collection of advanced Golang types and generic wrappers.
     -   [Boolean](#boolean)
     -   [String](#string)
     -   [Slice](#slice)
+    -   [Map]()
     -   [Functions](#functions)
     -   [Constants](#constants)
 -   [Informations](#informations)
@@ -96,6 +97,22 @@ type Ordered Slice[constraints.Ordered]
 ```
 
 For simple data types that can be compared, it is better to use the Ordened type. The Slice type is the one used for unordered types. [See more](#your-code-your-rules)
+
+### Map
+
+The Map type is a wrapper for map, It adds iteration methods with callback functions.
+Maps iteration is still in an indeterminate order.
+
+```golang
+m := New[rune, int]()
+m['a'] = 1
+m['b'] = 2
+m['c'] = 3
+
+callbackFn := func(k rune, v int) bool { return v%2 == 0 }
+
+filtered := m.Filter(callbackFn) // filtered = Map{ 'b' : 2 }
+```
 
 ### Functions
 
