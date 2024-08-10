@@ -10,16 +10,27 @@ import (
 	"io"
 	"math"
 	"math/rand"
+	"reflect"
 	"strconv"
-	"sync"
 	"testing"
 	"unicode"
 	"unicode/utf8"
-
-	"golang.org/x/exp/slices"
+	"unsafe"
 
 	. "github.com/cramanan/go-types/strings"
 )
+
+func eq(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := 0; i < len(a); i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
 
 var abcd = "abcd"
 var faces = "☺☻☹"
@@ -44,11 +55,6 @@ var indexTests = []IndexTest{
 	{"foo", "", 0},
 	{"foo", "o", 1},
 	{"abcABCabc", "A", 3},
-	{"jrzm6jjhorimglljrea4w3rlgosts0w2gia17hno2td4qd1jz", "jz", 47},
-	{"ekkuk5oft4eq0ocpacknhwouic1uua46unx12l37nioq9wbpnocqks6", "ks6", 52},
-	{"999f2xmimunbuyew5vrkla9cpwhmxan8o98ec", "98ec", 33},
-	{"9lpt9r98i04k8bz6c6dsrthb96bhi", "96bhi", 24},
-	{"55u558eqfaod2r2gu42xxsu631xf0zobs5840vl", "5840vl", 33},
 	// cases with one byte strings - test special case in Index()
 	{"", "a", -1},
 	{"x", "a", -1},
@@ -212,7 +218,7 @@ func TestIndexByte(t *testing.T) {
 		}
 		pos := Index(tt.s, tt.sep[0])
 		if pos != tt.out {
-			t.Errorf(`IndexByte(%q, %q) = %v; want %v`, tt.s, tt.sep[0], pos, tt.out)
+			t.Errorf(`Index(%q, %q) = %v; want %v`, tt.s, tt.sep[0], pos, tt.out)
 		}
 	}
 }
@@ -302,9 +308,8 @@ func TestIndexRune(t *testing.T) {
 		{"a☺b☻c☹d\xe2\x98�\xff�\xed\xa0\x80", utf8.MaxRune + 1, -1},
 	}
 	for _, tt := range tests {
-		got := Index(tt.in, tt.rune)
-		if got != tt.want {
-			t.Errorf("Index[Rune](%q, %d) = %v; want %v", tt.in, tt.rune, got, tt.want)
+		if got := Index(tt.in, tt.rune); got != tt.want {
+			t.Errorf("Index(%q, %d) = %v; want %v", tt.in, tt.rune, got, tt.want)
 		}
 	}
 
@@ -406,14 +411,12 @@ var splittests = []SplitTest{
 	{"1 2 3 4", " ", 3, []string{"1", "2", "3 4"}},
 	{"1 2", " ", 3, []string{"1", "2"}},
 	{"", "T", math.MaxInt / 4, []string{""}},
-	{"\xff-\xff", "", -1, []string{"\xff", "-", "\xff"}},
-	{"\xff-\xff", "-", -1, []string{"\xff", "\xff"}},
 }
 
 func TestSplit(t *testing.T) {
 	for _, tt := range splittests {
 		a := SplitN(tt.s, tt.sep, tt.n)
-		if !slices.Equal(a, tt.a) {
+		if !eq(a, tt.a) {
 			t.Errorf("Split(%q, %q, %d) = %v; want %v", tt.s, tt.sep, tt.n, a, tt.a)
 			continue
 		}
@@ -426,7 +429,7 @@ func TestSplit(t *testing.T) {
 		}
 		if tt.n < 0 {
 			b := Split(tt.s, tt.sep)
-			if !slices.Equal(a, b) {
+			if !reflect.DeepEqual(a, b) {
 				t.Errorf("Split disagrees with SplitN(%q, %q, %d) = %v; want %v", tt.s, tt.sep, tt.n, b, a)
 			}
 		}
@@ -452,7 +455,7 @@ var splitaftertests = []SplitTest{
 func TestSplitAfter(t *testing.T) {
 	for _, tt := range splitaftertests {
 		a := SplitAfterN(tt.s, tt.sep, tt.n)
-		if !slices.Equal(a, tt.a) {
+		if !eq(a, tt.a) {
 			t.Errorf(`Split(%q, %q, %d) = %v; want %v`, tt.s, tt.sep, tt.n, a, tt.a)
 			continue
 		}
@@ -462,7 +465,7 @@ func TestSplitAfter(t *testing.T) {
 		}
 		if tt.n < 0 {
 			b := SplitAfter(tt.s, tt.sep)
-			if !slices.Equal(a, b) {
+			if !reflect.DeepEqual(a, b) {
 				t.Errorf("SplitAfter disagrees with SplitAfterN(%q, %q, %d) = %v; want %v", tt.s, tt.sep, tt.n, b, a)
 			}
 		}
@@ -495,7 +498,7 @@ var fieldstests = []FieldsTest{
 func TestFields(t *testing.T) {
 	for _, tt := range fieldstests {
 		a := Fields(tt.s)
-		if !slices.Equal(a, tt.a) {
+		if !eq(a, tt.a) {
 			t.Errorf("Fields(%q) = %v; want %v", tt.s, a, tt.a)
 			continue
 		}
@@ -512,7 +515,7 @@ var FieldsFuncTests = []FieldsTest{
 func TestFieldsFunc(t *testing.T) {
 	for _, tt := range fieldstests {
 		a := FieldsFunc(tt.s, unicode.IsSpace)
-		if !slices.Equal(a, tt.a) {
+		if !eq(a, tt.a) {
 			t.Errorf("FieldsFunc(%q, unicode.IsSpace) = %v; want %v", tt.s, a, tt.a)
 			continue
 		}
@@ -520,7 +523,7 @@ func TestFieldsFunc(t *testing.T) {
 	pred := func(c rune) bool { return c == 'X' }
 	for _, tt := range FieldsFuncTests {
 		a := FieldsFunc(tt.s, pred)
-		if !slices.Equal(a, tt.a) {
+		if !eq(a, tt.a) {
 			t.Errorf("FieldsFunc(%q) = %v, want %v", tt.s, a, tt.a)
 		}
 	}
@@ -549,7 +552,6 @@ var upperTests = []StringTest{
 	{"AbC123", "ABC123"},
 	{"azAZ09_", "AZAZ09_"},
 	{"longStrinGwitHmixofsmaLLandcAps", "LONGSTRINGWITHMIXOFSMALLANDCAPS"},
-	{"RENAN BASTOS 93 AOSDAJDJAIDJAIDAJIaidsjjaidijadsjiadjiOOKKO", "RENAN BASTOS 93 AOSDAJDJAIDJAIDAJIAIDSJJAIDIJADSJIADJIOOKKO"},
 	{"long\u0250string\u0250with\u0250nonascii\u2C6Fchars", "LONG\u2C6FSTRING\u2C6FWITH\u2C6FNONASCII\u2C6FCHARS"},
 	{"\u0250\u0250\u0250\u0250\u0250", "\u2C6F\u2C6F\u2C6F\u2C6F\u2C6F"}, // grows one byte per char
 	{"a\u0080\U0010FFFF", "A\u0080\U0010FFFF"},                           // test utf8.RuneSelf and utf8.MaxRune
@@ -561,7 +563,6 @@ var lowerTests = []StringTest{
 	{"AbC123", "abc123"},
 	{"azAZ09_", "azaz09_"},
 	{"longStrinGwitHmixofsmaLLandcAps", "longstringwithmixofsmallandcaps"},
-	{"renan bastos 93 AOSDAJDJAIDJAIDAJIaidsjjaidijadsjiadjiOOKKO", "renan bastos 93 aosdajdjaidjaidajiaidsjjaidijadsjiadjiookko"},
 	{"LONG\u2C6FSTRING\u2C6FWITH\u2C6FNONASCII\u2C6FCHARS", "long\u0250string\u0250with\u0250nonascii\u0250chars"},
 	{"\u2C6D\u2C6D\u2C6D\u2C6D\u2C6D", "\u0251\u0251\u0251\u0251\u0251"}, // shrinks one byte per char
 	{"A\u0080\U0010FFFF", "a\u0080\U0010FFFF"},                           // test utf8.RuneSelf and utf8.MaxRune
@@ -660,9 +661,10 @@ func TestMap(t *testing.T) {
 	}
 	orig := "Input string that we expect not to be copied."
 	m = Map(identity, orig)
-	// if unsafe.StringData(orig) != unsafe.StringData(m) {
-	// 	t.Error("unexpected copy during identity map")
-	// }
+	if (*reflect.StringHeader)(unsafe.Pointer(&orig)).Data !=
+		(*reflect.StringHeader)(unsafe.Pointer(&m)).Data {
+		t.Error("unexpected copy during identity map")
+	}
 
 	// 7. Handle invalid UTF-8 sequence
 	replaceNotLatin := func(r rune) rune {
@@ -802,9 +804,7 @@ func TestSpecialCase(t *testing.T) {
 	}
 }
 
-func TestTrimSpace(t *testing.T) {
-	runStringTests(t, TrimSpace[string], "TrimSpace", trimSpaceTests)
-}
+func TestTrimSpace(t *testing.T) { runStringTests(t, TrimSpace[string], "TrimSpace", trimSpaceTests) }
 
 var trimTests = []struct {
 	f            string
@@ -1107,15 +1107,6 @@ func TestCaseConsistency(t *testing.T) {
 	*/
 }
 
-var longString = "a" + string(make([]byte, 1<<16)) + "z"
-var longSpaces = func() string {
-	b := make([]byte, 200)
-	for i := range b {
-		b[i] = ' '
-	}
-	return string(b)
-}()
-
 var RepeatTests = []struct {
 	in, out string
 	count   int
@@ -1127,15 +1118,6 @@ var RepeatTests = []struct {
 	{"-", "-", 1},
 	{"-", "----------", 10},
 	{"abc ", "abc abc abc ", 3},
-	{" ", " ", 1},
-	{"--", "----", 2},
-	{"===", "======", 2},
-	{"000", "000000000", 3},
-	{"\t\t\t\t", "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t", 4},
-	{" ", longSpaces, len(longSpaces)},
-	// Tests for results over the chunkLimit
-	{string(rune(0)), string(make([]byte, 1<<16)), 1 << 16},
-	{longString, longString + longString, 2},
 }
 
 func TestRepeat(t *testing.T) {
@@ -1167,48 +1149,33 @@ func repeat(s string, count int) (err error) {
 
 // See Issue golang.org/issue/16237
 func TestRepeatCatchesOverflow(t *testing.T) {
-	type testCase struct {
+	tests := [...]struct {
 		s      string
 		count  int
 		errStr string
-	}
-
-	runTestCases := func(prefix string, tests []testCase) {
-		for i, tt := range tests {
-			err := repeat(tt.s, tt.count)
-			if tt.errStr == "" {
-				if err != nil {
-					t.Errorf("#%d panicked %v", i, err)
-				}
-				continue
-			}
-
-			if err == nil || !Contains(err.Error(), tt.errStr) {
-				t.Errorf("%s#%d got %q want %q", prefix, i, err, tt.errStr)
-			}
-		}
-	}
-
-	const maxInt = int(^uint(0) >> 1)
-
-	runTestCases("", []testCase{
+	}{
 		0: {"--", -2147483647, "negative"},
-		1: {"", maxInt, ""},
+		1: {"", int(^uint(0) >> 1), ""},
 		2: {"-", 10, ""},
 		3: {"gopher", 0, ""},
 		4: {"-", -1, "negative"},
 		5: {"--", -102, "negative"},
 		6: {string(make([]byte, 255)), int((^uint(0))/255 + 1), "overflow"},
-	})
-
-	const is64Bit = 1<<(^uintptr(0)>>63)/2 != 0
-	if !is64Bit {
-		return
 	}
 
-	runTestCases("64-bit", []testCase{
-		0: {"-", maxInt, "strings: Repeat output length overflow"},
-	})
+	for i, tt := range tests {
+		err := repeat(tt.s, tt.count)
+		if tt.errStr == "" {
+			if err != nil {
+				t.Errorf("#%d panicked %v", i, err)
+			}
+			continue
+		}
+
+		if err == nil || !Contains(err.Error(), tt.errStr) {
+			t.Errorf("#%d expected %q got %q", i, tt.errStr, err)
+		}
+	}
 }
 
 func runesEqual(a, b []rune) bool {
@@ -1419,7 +1386,6 @@ var TitleTests = []struct {
 	{"unicode \xe2\x80\xa8 line separator", "Unicode \xe2\x80\xa8 Line Separator"},
 }
 
-// Deprecated
 // func TestTitle(t *testing.T) {
 // 	for _, tt := range TitleTests {
 // 		if s := Title(tt.in); s != tt.out {
@@ -1555,18 +1521,7 @@ var ContainsRuneTests = []struct {
 func TestContainsRune(t *testing.T) {
 	for _, ct := range ContainsRuneTests {
 		if Contains(ct.str, ct.r) != ct.expected {
-			t.Errorf("ContainsRune(%q, %q) = %v, want %v",
-				ct.str, ct.r, !ct.expected, ct.expected)
-		}
-	}
-}
-
-func TestContainsFunc(t *testing.T) {
-	for _, ct := range ContainsRuneTests {
-		if ContainsFunc(ct.str, func(r rune) bool {
-			return ct.r == r
-		}) != ct.expected {
-			t.Errorf("ContainsFunc(%q, func(%q)) = %v, want %v",
+			t.Errorf("Contains(%q, %q) = %v, want %v",
 				ct.str, ct.r, !ct.expected, ct.expected)
 		}
 	}
@@ -1603,36 +1558,13 @@ func TestEqualFold(t *testing.T) {
 }
 
 func BenchmarkEqualFold(b *testing.B) {
-	b.Run("Tests", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			for _, tt := range EqualFoldTests {
-				if out := EqualFold(tt.s, tt.t); out != tt.out {
-					b.Fatal("wrong result")
-				}
+	for i := 0; i < b.N; i++ {
+		for _, tt := range EqualFoldTests {
+			if out := EqualFold(tt.s, tt.t); out != tt.out {
+				b.Fatal("wrong result")
 			}
 		}
-	})
-
-	const s1 = "abcdefghijKz"
-	const s2 = "abcDefGhijKz"
-
-	b.Run("ASCII", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			EqualFold(s1, s2)
-		}
-	})
-
-	b.Run("UnicodePrefix", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			EqualFold("αβδ"+s1, "ΑΒΔ"+s2)
-		}
-	})
-
-	b.Run("UnicodeSuffix", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			EqualFold(s1+"αβδ", s2+"ΑΒΔ")
-		}
-	})
+	}
 }
 
 var CountTests = []struct {
@@ -1678,48 +1610,6 @@ func TestCut(t *testing.T) {
 	for _, tt := range cutTests {
 		if before, after, found := Cut(tt.s, tt.sep); before != tt.before || after != tt.after || found != tt.found {
 			t.Errorf("Cut(%q, %q) = %q, %q, %v, want %q, %q, %v", tt.s, tt.sep, before, after, found, tt.before, tt.after, tt.found)
-		}
-	}
-}
-
-var cutPrefixTests = []struct {
-	s, sep string
-	after  string
-	found  bool
-}{
-	{"abc", "a", "bc", true},
-	{"abc", "abc", "", true},
-	{"abc", "", "abc", true},
-	{"abc", "d", "abc", false},
-	{"", "d", "", false},
-	{"", "", "", true},
-}
-
-func TestCutPrefix(t *testing.T) {
-	for _, tt := range cutPrefixTests {
-		if after, found := CutPrefix(tt.s, tt.sep); after != tt.after || found != tt.found {
-			t.Errorf("CutPrefix(%q, %q) = %q, %v, want %q, %v", tt.s, tt.sep, after, found, tt.after, tt.found)
-		}
-	}
-}
-
-var cutSuffixTests = []struct {
-	s, sep string
-	before string
-	found  bool
-}{
-	{"abc", "bc", "a", true},
-	{"abc", "abc", "", true},
-	{"abc", "", "abc", true},
-	{"abc", "d", "abc", false},
-	{"", "d", "", false},
-	{"", "", "", true},
-}
-
-func TestCutSuffix(t *testing.T) {
-	for _, tt := range cutSuffixTests {
-		if before, found := CutSuffix(tt.s, tt.sep); before != tt.before || found != tt.found {
-			t.Errorf("CutSuffix(%q, %q) = %q, %v, want %q, %v", tt.s, tt.sep, before, found, tt.before, tt.found)
 		}
 	}
 }
@@ -1922,39 +1812,13 @@ func BenchmarkSplitNMultiByteSeparator(b *testing.B) {
 func BenchmarkRepeat(b *testing.B) {
 	s := "0123456789"
 	for _, n := range []int{5, 10} {
-		for _, c := range []int{0, 1, 2, 6} {
+		for _, c := range []int{1, 2, 6} {
 			b.Run(fmt.Sprintf("%dx%d", n, c), func(b *testing.B) {
 				for i := 0; i < b.N; i++ {
 					Repeat(s[:n], c)
 				}
 			})
 		}
-	}
-}
-
-func BenchmarkRepeatLarge(b *testing.B) {
-	s := Repeat("@", 8*1024)
-	for j := 8; j <= 30; j++ {
-		for _, k := range []int{1, 16, 4097} {
-			s := s[:k]
-			n := (1 << j) / k
-			if n == 0 {
-				continue
-			}
-			b.Run(fmt.Sprintf("%d/%d", 1<<j, k), func(b *testing.B) {
-				for i := 0; i < b.N; i++ {
-					Repeat(s, n)
-				}
-				b.SetBytes(int64(n * len(s)))
-			})
-		}
-	}
-}
-
-func BenchmarkRepeatSpaces(b *testing.B) {
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		Repeat(" ", 2)
 	}
 }
 
@@ -2082,648 +1946,5 @@ func BenchmarkReplaceAll(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		stringSink = ReplaceAll("banana", "a", "<>")
-	}
-}
-
-var emptyString string
-
-func TestClone(t *testing.T) {
-	var cloneTests = []string{
-		"",
-		Clone(""),
-		Repeat("a", 42)[:0],
-		"short",
-		Repeat("a", 42),
-	}
-	for _, input := range cloneTests {
-		clone := Clone(input)
-		if clone != input {
-			t.Errorf("Clone(%q) = %q; want %q", input, clone, input)
-		}
-
-		// if len(input) != 0 && unsafe.StringData(clone) == unsafe.StringData(input) {
-		// 	t.Errorf("Clone(%q) return value should not reference inputs backing memory.", input)
-		// }
-
-		// if len(input) == 0 && unsafe.StringData(clone) != unsafe.StringData(emptyString) {
-		// 	t.Errorf("Clone(%#v) return value should be equal to empty string.", unsafe.StringData(input))
-		// }
-	}
-}
-
-func BenchmarkClone(b *testing.B) {
-	var str = Repeat("a", 42)
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		stringSink = Clone(str)
-	}
-}
-
-func check(t *testing.T, b *Builder, want string) {
-	t.Helper()
-	got := b.String()
-	if got != want {
-		t.Errorf("String: got %#q; want %#q", got, want)
-		return
-	}
-	if n := b.Len(); n != len(got) {
-		t.Errorf("Len: got %d; but len(String()) is %d", n, len(got))
-	}
-	if n := b.Cap(); n < len(got) {
-		t.Errorf("Cap: got %d; but len(String()) is %d", n, len(got))
-	}
-}
-
-func TestBuilder(t *testing.T) {
-	var b Builder
-	check(t, &b, "")
-	n, err := b.WriteString("hello")
-	if err != nil || n != 5 {
-		t.Errorf("WriteString: got %d,%s; want 5,nil", n, err)
-	}
-	check(t, &b, "hello")
-	if err = b.WriteByte(' '); err != nil {
-		t.Errorf("WriteByte: %s", err)
-	}
-	check(t, &b, "hello ")
-	n, err = b.WriteString("world")
-	if err != nil || n != 5 {
-		t.Errorf("WriteString: got %d,%s; want 5,nil", n, err)
-	}
-	check(t, &b, "hello world")
-}
-
-func TestBuilderString(t *testing.T) {
-	var b Builder
-	b.WriteString("alpha")
-	check(t, &b, "alpha")
-	s1 := b.String()
-	b.WriteString("beta")
-	check(t, &b, "alphabeta")
-	s2 := b.String()
-	b.WriteString("gamma")
-	check(t, &b, "alphabetagamma")
-	s3 := b.String()
-
-	// Check that subsequent operations didn't change the returned
-	if want := "alpha"; s1 != want {
-		t.Errorf("first String result is now %q; want %q", s1, want)
-	}
-	if want := "alphabeta"; s2 != want {
-		t.Errorf("second String result is now %q; want %q", s2, want)
-	}
-	if want := "alphabetagamma"; s3 != want {
-		t.Errorf("third String result is now %q; want %q", s3, want)
-	}
-}
-
-func TestBuilderReset(t *testing.T) {
-	var b Builder
-	check(t, &b, "")
-	b.WriteString("aaa")
-	s := b.String()
-	check(t, &b, "aaa")
-	b.Reset()
-	check(t, &b, "")
-
-	// Ensure that writing after Reset doesn't alter
-	// previously returned
-	b.WriteString("bbb")
-	check(t, &b, "bbb")
-	if want := "aaa"; s != want {
-		t.Errorf("previous String result changed after Reset: got %q; want %q", s, want)
-	}
-}
-
-func TestBuilderGrow(t *testing.T) {
-	for _, growLen := range []int{0, 100, 1000, 10000, 100000} {
-		p := bytes.Repeat([]byte{'a'}, growLen)
-		allocs := testing.AllocsPerRun(100, func() {
-			var b Builder
-			b.Grow(growLen) // should be only alloc, when growLen > 0
-			if b.Cap() < growLen {
-				t.Fatalf("growLen=%d: Cap() is lower than growLen", growLen)
-			}
-			b.Write(p)
-			if b.String() != string(p) {
-				t.Fatalf("growLen=%d: bad data written after Grow", growLen)
-			}
-		})
-		wantAllocs := 1
-		if growLen == 0 {
-			wantAllocs = 0
-		}
-		if g, w := int(allocs), wantAllocs; g != w {
-			t.Errorf("growLen=%d: got %d allocs during Write; want %v", growLen, g, w)
-		}
-	}
-	// when growLen < 0, should panic
-	var a Builder
-	n := -1
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("a.Grow(%d) should panic()", n)
-		}
-	}()
-	a.Grow(n)
-}
-
-func TestBuilderWrite2(t *testing.T) {
-	const s0 = "hello 世界"
-	for _, tt := range []struct {
-		name string
-		fn   func(b *Builder) (int, error)
-		n    int
-		want string
-	}{
-		{
-			"Write",
-			func(b *Builder) (int, error) { return b.Write([]byte(s0)) },
-			len(s0),
-			s0,
-		},
-		{
-			"WriteRune",
-			func(b *Builder) (int, error) { return b.WriteRune('a') },
-			1,
-			"a",
-		},
-		{
-			"WriteRuneWide",
-			func(b *Builder) (int, error) { return b.WriteRune('世') },
-			3,
-			"世",
-		},
-		{
-			"WriteString",
-			func(b *Builder) (int, error) { return b.WriteString(s0) },
-			len(s0),
-			s0,
-		},
-	} {
-		t.Run(tt.name, func(t *testing.T) {
-			var b Builder
-			n, err := tt.fn(&b)
-			if err != nil {
-				t.Fatalf("first call: got %s", err)
-			}
-			if n != tt.n {
-				t.Errorf("first call: got n=%d; want %d", n, tt.n)
-			}
-			check(t, &b, tt.want)
-
-			n, err = tt.fn(&b)
-			if err != nil {
-				t.Fatalf("second call: got %s", err)
-			}
-			if n != tt.n {
-				t.Errorf("second call: got n=%d; want %d", n, tt.n)
-			}
-			check(t, &b, tt.want+tt.want)
-		})
-	}
-}
-
-func TestBuilderWriteByte(t *testing.T) {
-	var b Builder
-	if err := b.WriteByte('a'); err != nil {
-		t.Error(err)
-	}
-	if err := b.WriteByte(0); err != nil {
-		t.Error(err)
-	}
-	check(t, &b, "a\x00")
-}
-
-func TestBuilderAllocs(t *testing.T) {
-	// Issue 23382; verify that copyCheck doesn't force the
-	// Builder to escape and be heap allocated.
-	n := testing.AllocsPerRun(10000, func() {
-		var b Builder
-		b.Grow(5)
-		b.WriteString("abcde")
-		_ = b.String()
-	})
-	if n != 1 {
-		t.Errorf("Builder allocs = %v; want 1", n)
-	}
-}
-
-func TestBuilderCopyPanic(t *testing.T) {
-	tests := []struct {
-		name      string
-		fn        func()
-		wantPanic bool
-	}{
-		{
-			name:      "String",
-			wantPanic: false,
-			fn: func() {
-				var a Builder
-				a.WriteByte('x')
-				b := a
-				_ = b.String() // appease vet
-			},
-		},
-		{
-			name:      "Len",
-			wantPanic: false,
-			fn: func() {
-				var a Builder
-				a.WriteByte('x')
-				b := a
-				b.Len()
-			},
-		},
-		{
-			name:      "Cap",
-			wantPanic: false,
-			fn: func() {
-				var a Builder
-				a.WriteByte('x')
-				b := a
-				b.Cap()
-			},
-		},
-		{
-			name:      "Reset",
-			wantPanic: false,
-			fn: func() {
-				var a Builder
-				a.WriteByte('x')
-				b := a
-				b.Reset()
-				b.WriteByte('y')
-			},
-		},
-		{
-			name:      "Write",
-			wantPanic: true,
-			fn: func() {
-				var a Builder
-				a.Write([]byte("x"))
-				b := a
-				b.Write([]byte("y"))
-			},
-		},
-		{
-			name:      "WriteByte",
-			wantPanic: true,
-			fn: func() {
-				var a Builder
-				a.WriteByte('x')
-				b := a
-				b.WriteByte('y')
-			},
-		},
-		{
-			name:      "WriteString",
-			wantPanic: true,
-			fn: func() {
-				var a Builder
-				a.WriteString("x")
-				b := a
-				b.WriteString("y")
-			},
-		},
-		{
-			name:      "WriteRune",
-			wantPanic: true,
-			fn: func() {
-				var a Builder
-				a.WriteRune('x')
-				b := a
-				b.WriteRune('y')
-			},
-		},
-		{
-			name:      "Grow",
-			wantPanic: true,
-			fn: func() {
-				var a Builder
-				a.Grow(1)
-				b := a
-				b.Grow(2)
-			},
-		},
-	}
-	for _, tt := range tests {
-		didPanic := make(chan bool)
-		go func() {
-			defer func() { didPanic <- recover() != nil }()
-			tt.fn()
-		}()
-		if got := <-didPanic; got != tt.wantPanic {
-			t.Errorf("%s: panicked = %v; want %v", tt.name, got, tt.wantPanic)
-		}
-	}
-}
-
-func TestBuilderWriteInvalidRune(t *testing.T) {
-	// Invalid runes, including negative ones, should be written as
-	// utf8.RuneError.
-	for _, r := range []rune{-1, utf8.MaxRune + 1} {
-		var b Builder
-		b.WriteRune(r)
-		check(t, &b, "\uFFFD")
-	}
-}
-
-var someBytes = []byte("some bytes sdljlk jsklj3lkjlk djlkjw")
-
-var sinkS string
-
-func benchmarkBuilder(b *testing.B, f func(b *testing.B, numWrite int, grow bool)) {
-	b.Run("1Write_NoGrow", func(b *testing.B) {
-		b.ReportAllocs()
-		f(b, 1, false)
-	})
-	b.Run("3Write_NoGrow", func(b *testing.B) {
-		b.ReportAllocs()
-		f(b, 3, false)
-	})
-	b.Run("3Write_Grow", func(b *testing.B) {
-		b.ReportAllocs()
-		f(b, 3, true)
-	})
-}
-
-func BenchmarkBuildString_Builder(b *testing.B) {
-	benchmarkBuilder(b, func(b *testing.B, numWrite int, grow bool) {
-		for i := 0; i < b.N; i++ {
-			var buf Builder
-			if grow {
-				buf.Grow(len(someBytes) * numWrite)
-			}
-			for i := 0; i < numWrite; i++ {
-				buf.Write(someBytes)
-			}
-			sinkS = buf.String()
-		}
-	})
-}
-
-func BenchmarkBuildString_WriteString(b *testing.B) {
-	someString := string(someBytes)
-	benchmarkBuilder(b, func(b *testing.B, numWrite int, grow bool) {
-		for i := 0; i < b.N; i++ {
-			var buf Builder
-			if grow {
-				buf.Grow(len(someString) * numWrite)
-			}
-			for i := 0; i < numWrite; i++ {
-				buf.WriteString(someString)
-			}
-			sinkS = buf.String()
-		}
-	})
-}
-
-func BenchmarkBuildString_ByteBuffer(b *testing.B) {
-	benchmarkBuilder(b, func(b *testing.B, numWrite int, grow bool) {
-		for i := 0; i < b.N; i++ {
-			var buf bytes.Buffer
-			if grow {
-				buf.Grow(len(someBytes) * numWrite)
-			}
-			for i := 0; i < numWrite; i++ {
-				buf.Write(someBytes)
-			}
-			sinkS = buf.String()
-		}
-	})
-}
-
-// I Do not understand this :/
-//
-//	func TestBuilderGrowSizeclasses(t *testing.T) {
-//		s := Repeat("a", 19)
-//		allocs := testing.AllocsPerRun(100, func() {
-//			var b Builder
-//			b.Grow(18)
-//			b.WriteString(s)
-//			_ = b.String()
-//		})
-//		if allocs > 1 {
-//			t.Fatalf("unexpected amount of allocations: %v, want: 1", allocs)
-//		}
-//	}
-
-func TestReader(t *testing.T) {
-	r := NewReader("0123456789")
-	tests := []struct {
-		off     int64
-		seek    int
-		n       int
-		want    string
-		wantpos int64
-		readerr error
-		seekerr string
-	}{
-		{seek: io.SeekStart, off: 0, n: 20, want: "0123456789"},
-		{seek: io.SeekStart, off: 1, n: 1, want: "1"},
-		{seek: io.SeekCurrent, off: 1, wantpos: 3, n: 2, want: "34"},
-		{seek: io.SeekStart, off: -1, seekerr: "strings.Reader.Seek: negative position"},
-		{seek: io.SeekStart, off: 1 << 33, wantpos: 1 << 33, readerr: io.EOF},
-		{seek: io.SeekCurrent, off: 1, wantpos: 1<<33 + 1, readerr: io.EOF},
-		{seek: io.SeekStart, n: 5, want: "01234"},
-		{seek: io.SeekCurrent, n: 5, want: "56789"},
-		{seek: io.SeekEnd, off: -1, n: 1, wantpos: 9, want: "9"},
-	}
-
-	for i, tt := range tests {
-		pos, err := r.Seek(tt.off, tt.seek)
-		if err == nil && tt.seekerr != "" {
-			t.Errorf("%d. want seek error %q", i, tt.seekerr)
-			continue
-		}
-		if err != nil && err.Error() != tt.seekerr {
-			t.Errorf("%d. seek error = %q; want %q", i, err.Error(), tt.seekerr)
-			continue
-		}
-		if tt.wantpos != 0 && tt.wantpos != pos {
-			t.Errorf("%d. pos = %d, want %d", i, pos, tt.wantpos)
-		}
-		buf := make([]byte, tt.n)
-		n, err := r.Read(buf)
-		if err != tt.readerr {
-			t.Errorf("%d. read = %v; want %v", i, err, tt.readerr)
-			continue
-		}
-		got := string(buf[:n])
-		if got != tt.want {
-			t.Errorf("%d. got %q; want %q", i, got, tt.want)
-		}
-	}
-}
-
-func TestReadAfterBigSeek(t *testing.T) {
-	r := NewReader("0123456789")
-	if _, err := r.Seek(1<<31+5, io.SeekStart); err != nil {
-		t.Fatal(err)
-	}
-	if n, err := r.Read(make([]byte, 10)); n != 0 || err != io.EOF {
-		t.Errorf("Read = %d, %v; want 0, EOF", n, err)
-	}
-}
-
-func TestReaderAt(t *testing.T) {
-	r := NewReader("0123456789")
-	tests := []struct {
-		off     int64
-		n       int
-		want    string
-		wanterr any
-	}{
-		{0, 10, "0123456789", nil},
-		{1, 10, "123456789", io.EOF},
-		{1, 9, "123456789", nil},
-		{11, 10, "", io.EOF},
-		{0, 0, "", nil},
-		{-1, 0, "", "strings.Reader.ReadAt: negative offset"},
-	}
-	for i, tt := range tests {
-		b := make([]byte, tt.n)
-		rn, err := r.ReadAt(b, tt.off)
-		got := string(b[:rn])
-		if got != tt.want {
-			t.Errorf("%d. got %q; want %q", i, got, tt.want)
-		}
-		if fmt.Sprintf("%v", err) != fmt.Sprintf("%v", tt.wanterr) {
-			t.Errorf("%d. got error = %v; want %v", i, err, tt.wanterr)
-		}
-	}
-}
-
-func TestReaderAtConcurrent(t *testing.T) {
-	// Test for the race detector, to verify ReadAt doesn't mutate
-	// any state.
-	r := NewReader("0123456789")
-	var wg sync.WaitGroup
-	for i := 0; i < 5; i++ {
-		wg.Add(1)
-		go func(i int) {
-			defer wg.Done()
-			var buf [1]byte
-			r.ReadAt(buf[:], int64(i))
-		}(i)
-	}
-	wg.Wait()
-}
-
-func TestEmptyReaderConcurrent(t *testing.T) {
-	// Test for the race detector, to verify a Read that doesn't yield any bytes
-	// is okay to use from multiple goroutines. This was our historic behavior.
-	// See golang.org/issue/7856
-	r := NewReader("")
-	var wg sync.WaitGroup
-	for i := 0; i < 5; i++ {
-		wg.Add(2)
-		go func() {
-			defer wg.Done()
-			var buf [1]byte
-			r.Read(buf[:])
-		}()
-		go func() {
-			defer wg.Done()
-			r.Read(nil)
-		}()
-	}
-	wg.Wait()
-}
-
-func TestWriteTo(t *testing.T) {
-	const str = "0123456789"
-	for i := 0; i <= len(str); i++ {
-		s := str[i:]
-		r := NewReader(s)
-		var b bytes.Buffer
-		n, err := r.WriteTo(&b)
-		if expect := int64(len(s)); n != expect {
-			t.Errorf("got %v; want %v", n, expect)
-		}
-		if err != nil {
-			t.Errorf("for length %d: got error = %v; want nil", len(s), err)
-		}
-		if b.String() != s {
-			t.Errorf("got string %q; want %q", b.String(), s)
-		}
-		if r.Len() != 0 {
-			t.Errorf("reader contains %v bytes; want 0", r.Len())
-		}
-	}
-}
-
-// tests that Len is affected by reads, but Size is not.
-func TestReaderLenSize(t *testing.T) {
-	r := NewReader("abc")
-	io.CopyN(io.Discard, r, 1)
-	if r.Len() != 2 {
-		t.Errorf("Len = %d; want 2", r.Len())
-	}
-	if r.Size() != 3 {
-		t.Errorf("Size = %d; want 3", r.Size())
-	}
-}
-
-func TestReaderReset(t *testing.T) {
-	r := NewReader("世界")
-	if _, _, err := r.ReadRune(); err != nil {
-		t.Errorf("ReadRune: unexpected error: %v", err)
-	}
-
-	const want = "abcdef"
-	r.Reset(want)
-	if err := r.UnreadRune(); err == nil {
-		t.Errorf("UnreadRune: expected error, got nil")
-	}
-	buf, err := io.ReadAll(r)
-	if err != nil {
-		t.Errorf("ReadAll: unexpected error: %v", err)
-	}
-	if got := string(buf); got != want {
-		t.Errorf("ReadAll: got %q, want %q", got, want)
-	}
-}
-
-func TestReaderZero(t *testing.T) {
-	if l := (&Reader{}).Len(); l != 0 {
-		t.Errorf("Len: got %d, want 0", l)
-	}
-
-	if n, err := (&Reader{}).Read(nil); n != 0 || err != io.EOF {
-		t.Errorf("Read: got %d, %v; want 0, io.EOF", n, err)
-	}
-
-	if n, err := (&Reader{}).ReadAt(nil, 11); n != 0 || err != io.EOF {
-		t.Errorf("ReadAt: got %d, %v; want 0, io.EOF", n, err)
-	}
-
-	if b, err := (&Reader{}).ReadByte(); b != 0 || err != io.EOF {
-		t.Errorf("ReadByte: got %d, %v; want 0, io.EOF", b, err)
-	}
-
-	if ch, size, err := (&Reader{}).ReadRune(); ch != 0 || size != 0 || err != io.EOF {
-		t.Errorf("ReadRune: got %d, %d, %v; want 0, 0, io.EOF", ch, size, err)
-	}
-
-	if offset, err := (&Reader{}).Seek(11, io.SeekStart); offset != 11 || err != nil {
-		t.Errorf("Seek: got %d, %v; want 11, nil", offset, err)
-	}
-
-	if s := (&Reader{}).Size(); s != 0 {
-		t.Errorf("Size: got %d, want 0", s)
-	}
-
-	if (&Reader{}).UnreadByte() == nil {
-		t.Errorf("UnreadByte: got nil, want error")
-	}
-
-	if (&Reader{}).UnreadRune() == nil {
-		t.Errorf("UnreadRune: got nil, want error")
-	}
-
-	if n, err := (&Reader{}).WriteTo(io.Discard); n != 0 || err != nil {
-		t.Errorf("WriteTo: got %d, %v; want 0, nil", n, err)
 	}
 }

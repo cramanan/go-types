@@ -279,8 +279,10 @@ func ReplaceAll[S1 IString, S2 IString | IChar](s S1, old, new S2) S1 {
 //
 // To split around the first instance of a separator, see Cut.
 func Split[S1 IString, S2 IString | IChar](s S1, sep S2) (res []S1) {
-	for _, value := range strings.Split(string(s), string(sep)) {
-		res = append(res, S1(value))
+	native := strings.Split(string(s), string(sep))
+	res = make([]S1, len(native))
+	for i, value := range native {
+		res[i] = S1(value)
 	}
 	return res
 }
@@ -296,8 +298,13 @@ func Split[S1 IString, S2 IString | IChar](s S1, sep S2) (res []S1) {
 //
 // It is equivalent to [SplitAfterN] with a count of -1.
 func SplitAfter[S1 IString, S2 IString | IChar](s S1, sep S2) (res []S1) {
-	for _, value := range strings.SplitAfter(string(s), string(sep)) {
-		res = append(res, S1(value))
+	native := strings.SplitAfter(string(s), string(sep))
+	if native == nil {
+		return nil
+	}
+	res = make([]S1, len(native))
+	for i, value := range native {
+		res[i] = S1(value)
 	}
 	return res
 }
@@ -314,8 +321,13 @@ func SplitAfter[S1 IString, S2 IString | IChar](s S1, sep S2) (res []S1) {
 // Edge cases for s and sep (for example, empty strings) are handled
 // as described in the documentation for SplitAfter.
 func SplitAfterN[S1 IString, S2 IString | IChar](s S1, sep S2, n int) (res []S1) {
-	for _, value := range strings.SplitAfterN(string(s), string(sep), n) {
-		res = append(res, S1(value))
+	native := strings.SplitAfterN(string(s), string(sep), n)
+	if native == nil {
+		return nil
+	}
+	res = make([]S1, len(native))
+	for i, value := range native {
+		res[i] = S1(value)
 	}
 	return res
 }
@@ -335,6 +347,9 @@ func SplitAfterN[S1 IString, S2 IString | IChar](s S1, sep S2, n int) (res []S1)
 // To split around the first instance of a separator, see Cut.
 func SplitN[S1 IString, S2 IString | IChar](s S1, sep S2, n int) (res []S1) {
 	native := strings.SplitN(string(s), string(sep), n)
+	if native == nil {
+		return nil
+	}
 	res = make([]S1, len(native))
 	for i, value := range native {
 		res[i] = S1(value)
