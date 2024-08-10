@@ -334,8 +334,10 @@ func SplitAfterN[S1 IString, S2 IString | IChar](s S1, sep S2, n int) (res []S1)
 //
 // To split around the first instance of a separator, see Cut.
 func SplitN[S1 IString, S2 IString | IChar](s S1, sep S2, n int) (res []S1) {
-	for _, value := range strings.SplitN(string(s), string(sep), n) {
-		res = append(res, S1(value))
+	native := strings.SplitN(string(s), string(sep), n)
+	res = make([]S1, len(native))
+	for i, value := range native {
+		res[i] = S1(value)
 	}
 	return res
 }
