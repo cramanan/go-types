@@ -368,3 +368,17 @@ func TestIsEmpty(t *testing.T) {
 		t.Errorf("IsEmpty() got %t, want %t", got, true)
 	}
 }
+
+func TestMap_GetSet(t *testing.T) {
+	m3 := New[string, int]()
+	got := m3.Set("first", 123)
+	want := m3["first"]
+	if got != want {
+		t.Errorf("Set(\"first\") got %d, want %d", got, want)
+	}
+
+	key := "second"
+	if got, ok := m3.Get(key); ok {
+		t.Errorf("Get(%q) got a value when it shouldn't: %v", key, got)
+	}
+}

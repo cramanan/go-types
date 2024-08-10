@@ -1,3 +1,4 @@
+// The ordered provides slices of ordered types.
 package ordered
 
 import (

@@ -16,13 +16,13 @@ jobs:
         runs-on: ${{ matrix.platform }}
 
         steps:
+            - uses: actions/checkout@v4
+
             - name: Setup Go
-              uses: actions/setup-go@v4
+              uses: actions/setup-go@v5
               with:
                   go-version: ${{ matrix.go-version }}
                   cache-dependency-path: go.sum
-
-            - uses: actions/checkout@v4
 
             - name: Run Tests
               run: go test ./...

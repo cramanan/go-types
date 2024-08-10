@@ -416,40 +416,29 @@ func (s Ordered[O]) Slice() []O {
 	return s
 }
 
-// // experimental
-// // Range generates a sequence of numbers from start to end with a given step.
-// // The step value must be non-zero.
+// Esxperimental
+// Range generates a sequence of numbers from start to end with a given step.
+// The step value must be non-zero.
 // func Range[
 // 	B constraints.Integer | constraints.Float,
 // 	S constraints.Integer | constraints.Float,
 
-// ](start, end B, step S) (rng []S) {
-// 	stype := S(start)
-// 	etype := S(end)
-
-// 	absStep := step
-// 	if step < 0 {
-// 		absStep = -step
-// 	}
-
-// 	// Swap start and end if step is negative and start < end
-// 	if step < 0 && stype < etype {
-// 		stype, etype = etype, stype
+// ](start, end B, step S) (slice []S) {
+// 	if step == 0 {
+// 		panic("step cannot be 0")
 // 	}
 
 // 	switch {
 // 	case step > 0:
-// 		for i := stype; i < etype; i += absStep {
-// 			rng = append(rng, i)
+// 		for i := S(start); i < S(end); i += step {
+
 // 		}
+
 // 	case step < 0:
-// 		for i := stype; i > etype; i -= absStep {
-// 			rng = append(rng, i)
+// 		for i := S(start); i < S(end); i += step {
+
 // 		}
-// 	default:
-// 		panic("step cannot be zero")
 // 	}
-// 	return rng
 // }
 
 // // experimental

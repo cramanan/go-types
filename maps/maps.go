@@ -128,6 +128,23 @@ func (m Map[K, V]) Keys() []K { return maps.Keys(m) }
 // The values will be in an indeterminate order.
 func (m Map[K, V]) Values() []V { return maps.Values(m) }
 
+// Set sets the value for a given key in the map.
+// If the key already exists, the old value is replaced.
+// The new value is returned.
+func (m *Map[K, V]) Set(key K, value V) V {
+	(*m)[key] = value
+	return value
+}
+
+// Get retrieves the value for a given key from the map.
+// If the key is not present in the map, the second found value is false.
+// Otherwise, found is true and the value is returned.
+// Use m[key] if you don't need to know if the value was found
+func (m Map[K, V]) Get(key K) (value V, found bool) {
+	value, found = m[key]
+	return value, found
+}
+
 // Clone returns a copy of m.  This is a shallow clone:
 // the new keys and values are set using ordinary assignment.
 func (m Map[K, V]) Clone() Map[K, V] { return Clone(m) }
