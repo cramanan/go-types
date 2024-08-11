@@ -39,6 +39,9 @@ const (
 // New returns False as a Boolean.
 func New() Boolean { return *new(Boolean) }
 
+// From converts any Boolean into the Boolean type.
+func From[B ~bool](b B) Boolean { return Boolean(b) }
+
 // IsTruthy performs a Non Zero comparison of inferred type T
 func IsTruthy[T comparable](b T) bool { return b != *new(T) }
 
