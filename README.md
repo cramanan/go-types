@@ -15,7 +15,7 @@ A collection of advanced Golang types and generic wrappers.
     -   [Boolean](#boolean)
     -   [String](#string)
     -   [Slice](#slice)
-    -   [Map]()
+    -   [Map](#map)
     -   [Functions](#functions)
     -   [Constants](#constants)
 -   [Informations](#informations)
@@ -90,13 +90,13 @@ baz = baz.Prepend('f', 'o', 'o') // bar is now Slice[byte]("foobaz")
 slices.Map(bar, func(i int) int { return i *2 }) // return Slice[int]{2, 4, 6}
 ```
 
-The `gotypes/slices` also overwrites the standard [`slices`](https://pkg.go.dev/slices) library or [`golang.org/x/exp/slices`](https://pkg.go.dev/slices) (depending on your version).
+The `gotypes/slices` also overwrites the standard [`slices`](https://pkg.go.dev/slices) library or [`golang.org/x/exp/slices`](https://pkg.go.dev/golang.org/x/exp/slices) (depending on your version).
 
 ```
 type Ordered Slice[constraints.Ordered]
 ```
 
-For simple data types that can be compared, it is better to use the Ordened type. The Slice type is the one used for unordered types. [See more](#your-code-your-rules)
+For simple data types that can be compared, it is better to use the Ordened type. The Slice type is the one to used with unordered types. [See more](#your-code-your-rules)
 
 ### Map
 
