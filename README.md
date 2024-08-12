@@ -2,6 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/cramanan/go-types.svg)](https://pkg.go.dev/github.com/cramanan/go-types)
 [![Go Report Card](https://goreportcard.com/badge/github.com/cramanan/go-types)](https://goreportcard.com/report/github.com/cramanan/go-types)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/0240ccf7e51346d280a6b82013f2f388)](https://app.codacy.com/gh/cramanan/go-types/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)![example workflow](https://github.com/cramanan/go-types/actions/workflows/tests.yml/badge.svg)
 
 A collection of advanced Golang types and generic wrappers.
 
